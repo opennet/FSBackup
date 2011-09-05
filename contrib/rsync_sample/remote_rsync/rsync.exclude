@@ -1,0 +1,6 @@
++ /arc/test/
+- /arc/*
+/htdocs/cache/
+/.*
+/.ssh
+/tmp/

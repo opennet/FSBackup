@@ -1,0 +1,11 @@
+--- fsbackup.pl.orig	Fri May 27 16:10:18 2005
++++ fsbackup.pl	Thu May 26 20:40:26 2005
+@@ -443,6 +443,7 @@ if ( $cfg_type eq "local"){
+ 	# Обрабатываем разбиение на тома
+ 	for ($arc_block_level=0; $arc_block_level <= $#volume_position; $arc_block_level++){
+ 	    my $tmp_list_file = crate_tmp_list($arc_block_level, $volume_position[$arc_block_level], $volume_position[$arc_block_level+1], "$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.list");
++	    system( "cat $tmp_list_file | $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/$backup_file_base-$arc_block_level.tlist'");
+             system( "$prog_tar -c -f - -T $tmp_list_file $prog_gzip_filter $prog_pgp_filter| $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/$backup_file_base-$arc_block_level.tar${arc_ext}'") == 0 || print "SSH connection failed (tar): $?\n";
+ 	}
+     }
+

@@ -1,0 +1,17 @@
+/backup*
+/usr/local/etc/backup/cache
+*/OLD/*
+/cdrom
+/mnt
+/proc
+/tmp
+/var/log
+/var/mail
+/var/spool/postfix
+/usr/obj
+/usr/src
+/usr/tmp
+/usr/ports
+/usr/local/apache/logs
+/var/run/log
+

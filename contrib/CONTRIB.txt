@@ -1,0 +1,24 @@
+fsbackup.cron  by Alex Sokoloff. <sokoloff@mail.ru>
+
+Если поставить параметр $cfg_verbose = 0, и использовать приведенную
+в файле строку для crontab:
+18 4 * * * /opt/fsbackup/create_backup.sh| mail -s"`name -n` backup report" root
+получаем 2 письма, одно пустое от root, второе от Cron Daemon с
+сообщением "Null message body; hope that's ok"
+
+Предлагаю немного изменить запуск программы (ввести проверку на длину
+письма), вынести ее в файл fsbackup.cron (вариант файла в атаче).
+
+=====================================
+fsfind.pl  by Alex Sokoloff. <sokoloff@mail.ru>
+
+Я написал небольшой скрипт fsfind.pl для поиска файла в архивах он просматривает
+файлы list в директории с архивами. Может кому-то будет полезен. Работает с
+локальными архивами, с ftp и ssh не делал т.к. нет необходимости, но
+можно подумать.
+
+=====================================
+ib_backup.pl by Alex Sokoloff. <sokoloff@mail.ru>
+
+Написал маленький скриптец для бэкапа Interbase баз.
+

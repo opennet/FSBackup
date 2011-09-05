@@ -1,0 +1,6 @@
+Fedora, Debian... - необходимые модули входят в базовый пакет Perl 5.8.x
+
+AltLinux:
+    apt-get install perl-libnet
+    apt-get install perl-DBM
+

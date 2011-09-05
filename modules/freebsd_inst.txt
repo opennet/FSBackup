@@ -1,0 +1,3 @@
+cd /usr/ports/net/p5-Net/ && make && make install 
+cd /usr/ports/security/p5-Digest-MD5 && make && make install
+cd /usr/ports/databases/db3 && make && make install

@@ -1,0 +1,441 @@
+Step-by-step guide by kubrack <ak at tim.ua>
+ 
+ Install & Config
+-----------------------------------------------------
+1) Log in system as root
+
+2) wget http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl1.tar.gz
+ If you have not wget you can download this file in any browser.
+
+3) tar -zvxf fsbackup-1.2pl1.tar.gz
+
+4) cd fsbackup-1.2pl1/
+
+5) ./install.pl
+ If you want to install fsbackup in other directory
+ (/usr/local/fsbackup/ by default), you may owerride it by --prefix
+ directive, for example: ./install.pl --prefix /usr/fsbackup/
+
+ You may answer by default on all script questions (simply Enter)
+ You will see 'Installation complete' message after install done.
+
+6) Now, you have fsbackup installed fully in /usr/local/fsbackup (or
+ other --prefix ) directory. It consist scripts, config example and docs
+ in some directories.
+
+ Main script is create_backup.sh. It must be run periodicy via cron, or
+ manualy, if necessary. In this one, you may determine one or more
+ config files. Every config file will describe one set of backups.
+
+ First, save original files:
+
+     cd /usr/local/fsbackup/
+     cp -v create_backup.sh create_backup.sh.orig
+     cp -v cfg_example my_backup1.cfg
+
+7) Edit them:
+ joe create_backup.sh
+ (I like a joe, but you may be have other favorites, as vi or ed :)
+ In create_backup.sh, we must change only "config_files" perameter (row 33). Set it to
+
+	config_files="my_backup1.cfg"
+
+ end examine others:
+
+	backup_path="/usr/local/fsbackup" - leave untouched, if you don't use --prefix option for install.pl
+	backup_mysql=0
+	backup_pgsql=0
+	backup_sqlite=0
+	backup_sys=0
+
+ - if we dont want to backup databases and sysconfigs. Otherwise, we must
+ edit scripts/* too. Write me pls if you want it.
+
+ Save it end exit from editor.
+
+8) joe my_backup1.cfg
+
+    row 13: $cfg_backup_name - simply tag of backup. Hostname by
+            default. May contain [a-z,A-Z,0-9,_] only.
+
+    row 22: $cfg_cache_dir - backup cache directory. If possible, leave
+            "/usr/local/fsbackup/cache"
+
+    rows 36-40: $prog_* - may be checked, but usually true for RH.
+
+NOTES:
+
+* if you dont want enscryption, set $prog_pgp = "". Be sure: it about
+enscryption of entry archive, NOT simply protect it for transfer to
+network backup server (SSH will describe below). It may eat many
+resources for big backups.
+
+* if you want enscryption and set $prog_pgp = "/usr/bin/gpg", set
+$prog_gzip = "", because gpg will already compress it.
+
+    row 56: $cfg_checksum - used for incremental backup, "timesize" recomended.
+
+    row 75: $cfg_backup_style - "backup" for incremental backup
+
+    row 85: $cfg_increment_level - as described, after how many
+            incremental copy make full refresh of backup. If 0, don't make full  refresh.
+
+    row 100: $cfg_save_old_backup - save or not OLD backup.
+
+    row 114: $cfg_type - for local part of your project, must be
+           "local". Use dedicated HD for backup destination is recommended.
+
+For you demands, must be created two configs (and placed into create_backup.sh):
+
+* first, for backup all demanded dirs or files, with $cfg_type="local"
+
+* other, for move first backup to another server, with $cfg_type=
+"remote_ssh" or "remote_ftp", in which result of first backup
+($cfg_local_path) described as backuped dir.
+
+About methods: ssh is more secure, but ftp is more quickly. If both
+servers are placed in one ethernet segment, with trusted hosts only, use
+ftp. Otherwise, ssh.
+
+For ssh method certificate must be generated on backup destination
+server and placed into user's home on another server.
+
+    row 122-124: $cfg_remote* - settings for remote cfg_types.
+
+    row 135: $cfg_remote_ftp_mode - 1 if you have problem with firewalls between servers.
+
+    row 142: $cfg_remote_password - for ftp login to remote server.
+
+    row 152: $cfg_local_path - if $cfg_type=local, backups will be
+             placed here. Not the some with cache! Must be already created. Dont
+             forget exclude it from directories for backup below.
+
+    row 162: $cfg_time_limit - as described, 0 for all.
+
+    row 172: $cfg_size_limit - as described, in KB
+
+    row 186: $cfg_maximum_archive_size - BEFORE compression!
+
+    row 195: $cfg_root_path - change it if you want describe all not from root dir.
+
+    row 206: $cfg_pgp_userid - as described, for enscryption.
+
+    row 222: $cfg_verbose - verbose level
+
+    row 241: $cfg_stopdir_prune - leave untouched
+
+So, for local backup I have change next setting:
+
+    $prog_pgp       = "";
+
+Below, you have a list of backuped files & directories. For Linux,
+comment out strings 326,327 (BSD pkgs & kernel), and edit other for your
+directories.
+
+My list:
+
+__DATA__
+/usr/local/fsbackup
+!/usr/local/fsbackup/cache
+!/usr/local/fsbackup/archive
+f!\.core$
+f!^core$
+f!\.o$
+f!\.log$
+
+# Linux
+/usr/src/linux/.config
+
+# Users
+/home
+/root
+!/home/ftp
+=!\.netscape/cache/
+=!\.mozilla/.*/Cache/
+=!\.mozilla/.*/NewCache/
+=!\.mozilla/.*/News/
+f!.*\.avi$
+f!.*\.mpeg$
+f!.*\.mpg$
+f!.*\.mp3$
+
+# System configuration
+/etc
+/var/cron/tabs
+/var/spool/cron
+/usr/local/etc
+
+NOTE: I have dedicated HDD mount to /usr/local/fsbackup/archive
+
+8) Creating the local backup dir & protect it:
+
+	mkdir -p /usr/local/fsbackup/archive
+	chmod 700 /usr/local/fsbackup/archive
+
+9) Planning of backup:
+
+	joe /etc/crontab
+
+add string:
+
+	1 1 * * 1 root  /usr/local/fsbackup/create_backup.sh
+
+for weekly backup, or
+
+	1 1 * * * root  /usr/local/fsbackup/create_backup.sh
+
+for daily backup. You can run it as "nice -n 5 /usr/local/fsbackup/create_backup.sh" 
+if you want decrease CPU load by backup for other apps.
+
+10) Testing fsbackup:
+
+# /usr/local/fsbackup/create_backup.sh
+Creating local backup: router_ap01
+Current increment number: 0
+Adding /usr/local/fsbackup....
+done
+Adding /usr/src/linux/.config....
+done
+Adding /home....
+done
+Adding /root....
+done
+Adding /etc....
+done
+Adding /var/cron/tabs....
+done
+Adding /var/spool/cron....
+done
+Adding /usr/local/etc....
+done
+Storing local backup...
+***** Backup successful complete.
+
+11) And verify:
+
+# ls -l /usr/local/fsbackup/archive
+total 11088
+-rw-r--r--    1 root     root     11091270 Sep 10 02:23 router_ap01-2005.09.10.02.23.00-0.tar.gz
+-rw-r--r--    1 root     root            0 Sep 10 02:23 router_ap01-2005.09.10.02.23.00.del
+-rw-r--r--    1 root     root        28874 Sep 10 02:23 router_ap01-2005.09.10.02.23.00.dir
+-rw-r--r--    1 root     root       172032 Sep 10 02:23 router_ap01-2005.09.10.02.23.00.hash
+-rw-r--r--    1 root     root        36191 Sep 10 02:23 router_ap01-2005.09.10.02.23.00.list
+-rw-r--r--    1 root     root        41787 Sep 10 02:23 router_ap01-2005.09.10.02.23.00.lsize
+
+
+--- Write me your questions pls. Answers & about restore from backup in
+next mail.
+
+
+Restoring
+-----------------------------------------------------
+
+For restoring data from the backup, we can use script
+/usr/local/fsbackup/scripts/fsrestore.sh
+
+May be you want to save this file separately, simply in backup dir, for
+more quickly restoring:
+
+cp -v /usr/local/fsbackup/scripts/fsrestore.sh /usr/local/fsbackup/archive/
+
+1) Make some changes:
+
+joe /usr/local/fsbackup/scripts/fsrestore.sh
+there are 3 options here:
+
+* backup_name
+ tag of data for extract (if you have more than 1 config for fsbackup,
+ you can restore it separately)
+
+* backup_path
+ in our fsbackup config we have "/usr/local/fsbackup/archive", but may
+ be after crash you will want mount dedicated HD to other point..
+
+* restore_path
+ this dir will be "root point" for the extracted data.
+
+2) do restoring process:
+/usr/local/fsbackup/scripts/fsrestore.sh
+
+Removing deleted files for router_ap01-2005.09.10.02.23.00-0.tar.gz...
+Restoring router_ap01-2005.09.10.02.23.00-0.tar.gz...
+Fixing directory permissions for router_ap01-2005.09.10.02.23.00-0.tar.gz...
+mkdir: cannot create directory `./usr/local/fsbackup': File exists
+mkdir: cannot create directory `./usr/local/fsbackup/scripts': File exists
+mkdir: cannot create directory `./root': File exists
+...
+
+dont worry about "mkdir: cannot create directory" warnings: it simple
+try to create already created dirs in second pass of restoring.
+
+fsrestore.sh will create all your data from base & all increments of
+archive. Check it!
+
+
+FAQ
+-----------------------------------------------------
+
+> Q: Local Backup done! Worked like a charm .. your instructions
+> were great. So my plan is to do a local backup every day (incremental
+> everyday and a full backup every 7 days).
+
+A: For auto-run fsbackup every day we need put
+/usr/local/fsbackup/create_backup.sh into Unix sheduler (/etc/crontab):
+
+	cat >> /etc/crontab <<_END_
+	1 1 * * * root  /usr/local/fsbackup/create_backup.sh
+	_END_
+
+ now your backup will be run every day at 1:01 AM.
+Behaviour  of incremental-full backup determining into row 85 of /usr/local/fsbackup/my_backup1.cfg:
+
+	$cfg_increment_level = 7;
+	7 = 1 full backup after every 6 incremental backups
+
+> Q: However, to copy backups to remote system, I am thinking of using "rsync
+> over ssh" rather than using another config file with fs_backup. What do you
+> think about that ? Will that work ?
+
+A: Yes, but fsbackup can do it itself via ssh. Configuring this below:
+
+ Lets HOST_FROM is machine which from we need secure coping files, and
+ HOST_TO is machine which to we will to copy (server).
+
+ (1) Make ssh serificate on HOST_FROM:
+
+Login as root (because this user must have permissions for access to
+backuped files in this host, may be some other, if no need to backup
+system dirs);
+
+        root@HOST_FROM# ssh-keygen -t rsa ;
+        answer questions ;
+        root@HOST_FROM# ssh-keygen -t dsa ;
+        answer questions ;
+        root@HOST_FROM# cat ~/.ssh/id_rsa.pub ;
+        root@HOST_FROM# cat ~/.ssh/id_dsa.pub ;
+        copy anywhere result of two last command (2 rows) ;
+
+(2) On host HOST_TO:
+(2.1)Make sure to exist & uncomment next lines in your sshd config (usualy /etc/ssh/sshd_config) :
+
+	 RSAAuthentication yes
+	 PubkeyAuthentication yes
+	 AuthorizedKeysFile     .ssh/authorized_keys
+
+If no, add its and restart sshd (/etc/init.d/sshd restart)
+
+(2.2) Create .ssh directory in home of user, who will be owner to
+fsbackup repository. Usually he is ordinate user, not root, for security
+reason.
+
+Make ~/.ssh/authorized_keys file there, and grant permissions:
+
+	root@HOST_TO# su - someuser
+	someuser@HOST_TO> mkdir ~/.ssh
+	someuser@HOST_TO> touch ~/.ssh/authorized_keys
+	someuser@HOST_TO> chmod 700 ~/.ssh
+	someuser@HOST_TO> chmod 600 ~/.ssh/authorized_keys
+
+(2.3) Put two rows from previons step (content of /root/.ssh/id_rsa.pub,
+/root/.ssh/id_dsa.pub from HOST_FROM) into the ~/.ssh/authorized_keys
+
+ (3) Test of public key authentication:
+
+As root@HOST_FROM, try:
+
+	root@HOST_FROM# ssh someuser@HOST_TO
+
+you will logged as 'someuser' to 'HOST_TO', without password.
+
+ (4) If step 3 successful, configure fsbackup on HOST_FROM for store
+ backup to repository on HOST_TO.
+
+NOTE: you not need to install and run fsbackup on HOST_TO.
+(4.1) Make repository on HOST_TO owned by 'someuser' and set permissions:
+
+	someuser@HOST_TO> mkdir ~/backup_from_HOST_FROM
+	someuser@HOST_TO> chmod 700 ~/backup_from_HOST_FROM
+
+(4.2) Configure fsbackup on HOST_FROM:
+
+	root@HOST_FROM# joe /usr/local/fsbackup/my_backup1.cfg
+
+change next rows:
+
+	$cfg_type = "remote_ssh";
+	$cfg_remote_host = "HOST_TO";
+	$cfg_remote_login = "someuser";
+	$cfg_remote_path = "/home_of_someuser/backup_from_HOST_FROM";
+
+(4.3) run the fsbackup and check result:
+
+	root@HOST_FROM# /usr/local/fsbackup/create_backup.sh
+	someuser@HOST_TO> ls -l ~/backup_from_HOST_FROM/
+
+(4.3) dont forget to place to /etc/crontab on HOST_FROM next row for everyday backup:
+
+	1 1 * * * root  /usr/local/fsbackup/create_backup.sh
+
+> Q: Do you have any script to test if the backup completed successfully
+> every day ? I want to plug that script into my nagios so that I know that the
+> backup happened everyday. So if I run the backup script everyday, I can have
+> this script check for it. If for any reason, the backup failed, my nagios will
+> alert me.
+
+A: Hmm.. if you have fsbackup runned from /etc/crontab as root, as
+described above, cron will send to root all output of script as mail
+every day. It is most full method of backup control, because logical
+mistakes are possible, as empty directories or missed directories to
+backup, etc. But if you want to trace some certain moments, tell me and
+we will try to resolve it.
+
+> Q: I forgot one small thing. One of my systems has mysql on it. You mentioned this: 
+>     - if we dont want to backup databases and sysconfigs. Otherwise, we
+>     must edit scripts/* too. Write me pls if you want it.
+> 
+>     Would it be too difficult to give me instructions to backup mysql databases ? 
+
+A: For setup to backup mysql database, we need to: 
+
+(1) edit  /usr/local/fsbackup/scripts/mysql_backup.sh:
+
+row 17: backup_name="some_name"
+
+row 43: backup_method="full"	- all databases
+
+row 52: backup_db_list 		- list of databases - not used if
+backup_method="full", aplied if backup_method= "db" or "notdb"
+
+row 61,62: backup_mysqluser,backup_mysqlpassword  - auth information for MySQL
+
+row 73:	backup_path - mysql backups will be placed here.
+
+row 81: backup_progdump_path="/usr/local/bin" - path to "mysqldump"
+
+row 93: extra_mysqldump_flag="--complete-insert" - extra mysqldump
+flags. See man mysqldump to find what you want.
+
+(2) edit the backup run script, /usr/local/fsbackup/create_backup.sh:
+ joe /usr/local/fsbackup/create_backup.sh
+ in line 42, set:
+ backup_mysql=1
+
+(3) test your mysql_backup script:
+ /usr/local/fsbackup/scripts/mysql_backup.sh
+and all system:
+ /usr/local/fsbackup/create_backup.sh
+
+
+> Q: Also, what do you mean by "sysconfigs" ?  
+
+A: As sysconfigs here is meant are information about installed packages,
+for opportunity to quick restore all non-system (installed by packages)
+services. 
+
+
+> Q: I am backing up /etc directory. Are there system configs besides /etc directory ?
+
+A: Some thrid-party services stored config files in /usr/local/etc dir
+too. And there are some important config data which stored in Linux in
+/var, as named's zone files.
+
