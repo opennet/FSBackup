@@ -3,9 +3,9 @@
 # --prefix=install path, default /usr/local/fsbackup
 # --prefix-man=manual path location, default /usr/local/man/man1
 #
-# Скрипт для установки программы и всех недостающих Perl модулей.
-# --prefix=путь куда устаналивать программу, по умолчанию /usr/local/fsbackup
-# --prefix-man=путь куда скопировать системное руководство для программы.
+# п║п╨я─п╦п©я┌ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦ п©я─п╬пЁя─п╟п╪п╪я▀ п╦ п╡я│п╣я┘ п╫п╣п╢п╬я│я┌п╟я▌я┴п╦я┘ Perl п╪п╬п╢я┐п╩п╣п╧.
+# --prefix=п©я┐я┌я▄ п╨я┐п╢п╟ я┐я│я┌п╟п╫п╟п╩п╦п╡п╟я┌я▄ п©я─п╬пЁя─п╟п╪п╪я┐, п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌ /usr/local/fsbackup
+# --prefix-man=п©я┐я┌я▄ п╨я┐п╢п╟ я│п╨п╬п©п╦я─п╬п╡п╟я┌я▄ я│п╦я│я┌п╣п╪п╫п╬п╣ я─я┐п╨п╬п╡п╬п╢я│я┌п╡п╬ п╢п╩я▐ п©я─п╬пЁя─п╟п╪п╪я▀.
 #
 # http://www.opennet.ru/dev/fsbackup/
 # Copyright (c) 2001 by Maxim Chirkov. <mc@tyumen.ru>
@@ -47,6 +47,7 @@ chomp($backup_name = `uname -n|tr '.' '_'`);
 print "Makeing man page...\n";
 system ("pod2man fsbackup.pl > fsbackup.1");
 print "Installing man page to $prefix_man...\n";
+system ("mkdir -p $prefix_man");
 system ("cp -f fsbackup.1 $prefix_man/fsbackup.1");
 system ("chmod 644 $prefix_man/fsbackup.1");
 
@@ -98,6 +99,8 @@ copyfile("scripts/sysrestore.sh", "$prefix/scripts/sysrestore.sh");
 system ("chmod 711 $prefix/scripts/sysrestore.sh");
 copyfile("scripts/sqlite_backup.sh", "$prefix/scripts/sqlite_backup.sh");
 system ("chmod 711 $prefix/scripts/sqlite_backup.sh");
+copyfile("scripts/mount-windows-share.sh", "$prefix/scripts/mount-windows-share.sh");
+system ("chmod 711 $prefix/scripts/mount-windows-share.sh");
 
 print "* If you system not support MD5, please manually install module ./modules/Digest-Perl-MD5-1.5.tar.gz\n";
 print "* If Berkeley DB not installed and failed compilation of DB_File-1.77.tar.gz, please manually install DB from http://www.sleepycat.com.\n";
@@ -126,7 +129,7 @@ while (($cur_module_path, $cur_archive)= each(%module_list)) {
 print "Installation complete.\n";
 exit;
 #############################################################
-# Процедура для копирования файлов с изменениями
+# п÷я─п╬я├п╣п╢я┐я─п╟ п╢п╩я▐ п╨п╬п©п╦я─п╬п╡п╟п╫п╦я▐ я└п╟п╧п╩п╬п╡ я│ п╦п╥п╪п╣п╫п╣п╫п╦я▐п╪п╦
 
 sub copyfile{
 	my ($from_file, $to_file) = @_;
@@ -174,7 +177,7 @@ sub copyfile{
     close(FROM_FILE);
 }
 ######################################################################
-# Процедура для автоматической установки модулей.
+# п÷я─п╬я├п╣п╢я┐я─п╟ п╢п╩я▐ п╟п╡я┌п╬п╪п╟я┌п╦я┤п╣я│п╨п╬п╧ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╪п╬п╢я┐п╩п╣п╧.
 sub install_module{
 	my($module_name, $module_archive) = @_;
 	my ($module_dir);

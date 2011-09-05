@@ -1,6 +1,9 @@
-Fedora, Debian... - необходимые модули входят в базовый пакет Perl 5.8.x
+Fedora, Debian... - п╫п╣п╬п╠я┘п╬п╢п╦п╪я▀п╣ п╪п╬п╢я┐п╩п╦ п╡я┘п╬п╢я▐я┌ п╡ п╠п╟п╥п╬п╡я▀п╧ п©п╟п╨п╣я┌ Perl 5.8.x
 
 AltLinux:
     apt-get install perl-libnet
     apt-get install perl-DBM
 
+Gentoo:
+    emerge -v perl-core/Digest-MD5 perl-core/DB_File dev-perl/DBD-mysql dev-perl/DBI dev-perl/Net-Daemon mysql perl-core/libnet dev-perl/MLDBM
+    

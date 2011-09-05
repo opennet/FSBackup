@@ -1,5 +1,5 @@
 #!/bin/sh
-# òÏÔÁÃÉÑ ÐÏÞÁÓÏ×ÙÈ ÂÜËÁÐÏ× SQL ÚÁ ÄÅÎØ
+# Ð Ð¾Ñ‚Ð°Ñ†Ð¸Ñ Ð¿Ð¾Ñ‡Ð°ÑÐ¾Ð²Ñ‹Ñ… Ð±ÑÐºÐ°Ð¿Ð¾Ð² SQL Ð·Ð° Ð´ÐµÐ½ÑŒ
 
 # cron:
 # 43 0 * * *      /usr/local/fsbackup/scripts/daily_sql_backup.sh >/dev/null

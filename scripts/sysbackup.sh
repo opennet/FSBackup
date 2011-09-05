@@ -1,15 +1,15 @@
 #!/bin/sh
 # Script for store system configuration files and information about installed
 # packages.
-# Скрипт для сохранения списк всех файлов в системе, списка установленных пакетов
-# и файлов конфигурации.
+# п║п╨я─п╦п©я┌ п╢п╩я▐ я│п╬я┘я─п╟п╫п╣п╫п╦я▐ я│п©п╦я│п╨ п╡я│п╣я┘ я└п╟п╧п╩п╬п╡ п╡ я│п╦я│я┌п╣п╪п╣, я│п©п╦я│п╨п╟ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀я┘ п©п╟п╨п╣я┌п╬п╡
+# п╦ я└п╟п╧п╩п╬п╡ п╨п╬п╫я└п╦пЁя┐я─п╟я├п╦п╦.
 #
 # http://www.opennet.ru/dev/fsbackup/
 # Copyright (c) 2001 by Maxim Chirkov. <mc@tyumen.ru>
 
 #-------------------
 # Name of backup, single word.
-# Имя бэкапа.
+# п≤п╪я▐ п╠я█п╨п╟п©п╟.
 #-------------------
 
 backup_name="test_host"
@@ -17,7 +17,7 @@ backup_name="test_host"
 
 #-------------------
 # Directory to store system backup. 
-# Корневая директория куда будут помещены данные системного бэкапа.
+# п п╬я─п╫п╣п╡п╟я▐ п╢п╦я─п╣п╨я┌п╬я─п╦я▐ п╨я┐п╢п╟ п╠я┐п╢я┐я┌ п©п╬п╪п╣я┴п╣п╫я▀ п╢п╟п╫п╫я▀п╣ я│п╦я│я┌п╣п╪п╫п╬пЁп╬ п╠я█п╨п╟п©п╟.
 #-------------------
 
 sysbackup_path="/usr/local/fsbackup/sys_backup" 
@@ -45,9 +45,9 @@ if [ "_$sysname" = "_linux" ]; then
     cat /proc/modules > $sysbackup_path/modules.txt
     /sbin/fdisk -l > $sysbackup_path/fdisk.txt
     netstat -rn > $sysbackup_path/routes.txt
-    # Бэкап MBR
+    # п▒я█п╨п╟п© MBR
     #dd if=/dev/sda of=$sysbackup_path/mbr_sda.bin bs=1 count=512
-    # Списки устройств.
+    # п║п©п╦я│п╨п╦ я┐я│я┌я─п╬п╧я│я┌п╡.
     #cat /proc/pci > $sysbackup_path/pci.txt
     #cat /proc/bus/usb/devices > $sysbackup_path/usb.txt
     #cat /proc/scsi/scsi > $sysbackup_path/scsi.txt
@@ -59,7 +59,7 @@ if [ "_$sysname" = "_freebsd" ]; then
     sysctl -a > $sysbackup_path/sysctl.txt
     fdisk > $sysbackup_path/fdisk.txt
     geom disk list > $sysbackup_path/geom_disk.txt
-    # Выводим данные о таблицах разделов.
+    # п▓я▀п╡п╬п╢п╦п╪ п╢п╟п╫п╫я▀п╣ п╬ я┌п╟п╠п╩п╦я├п╟я┘ я─п╟п╥п╢п╣п╩п╬п╡.
     {
 	disk_list=`sysctl kern.disks| cut -d':' -f2`
 	for disk in $disk_list; do
@@ -72,7 +72,7 @@ if [ "_$sysname" = "_freebsd" ]; then
         done
     }> $sysbackup_path/disk.txt
 
-    # Сохранение базовой конфигурации			        
+    # п║п╬я┘я─п╟п╫п╣п╫п╦п╣ п╠п╟п╥п╬п╡п╬п╧ п╨п╬п╫я└п╦пЁя┐я─п╟я├п╦п╦			        
     cp -f /etc/rc.conf $sysbackup_path/${backup_name}-rc.conf
     . /etc/rc.conf
     interface=`echo "$network_interfaces"| awk '{print $1}'`;

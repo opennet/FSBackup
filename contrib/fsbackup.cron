@@ -1,9 +1,9 @@
 #!/bin/sh
 # Backup planner running from crontab.
-# Скрипт для запуска backup подсистемы из crontab.
+# п║п╨я─п╦п©я┌ п╢п╩я▐ п╥п╟п©я┐я│п╨п╟ backup п©п╬п╢я│п╦я│я┌п╣п╪я▀ п╦п╥ crontab.
 #
 #
-# Пример строки для crontab: 18 4 * * * /opt/fsbackup/fs_backup.cron
+# п÷я─п╦п╪п╣я─ я│я┌я─п╬п╨п╦ п╢п╩я▐ crontab: 18 4 * * * /opt/fsbackup/fs_backup.cron
 #
 
 letter="`/opt/fsbackup/create_backup.sh` "

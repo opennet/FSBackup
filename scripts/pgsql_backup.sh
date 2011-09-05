@@ -1,72 +1,101 @@
 #!/bin/sh
-# Script for backup SQL tables from PostreSQL
-# Скрипт для бэкапа данных хранимых в PostgreSQL
 #
 # http://www.opennet.ru/dev/fsbackup/
 # Copyright (c) 2001 by Maxim Chirkov. <mc@tyumen.ru>
+# Changed by Molchanov Alexander <xorader@mail.ru (2012)
+# Ver 1.5
+#
+# Script for backup SQL tables from PostreSQL
+# п║п╨я─п╦п©я┌ п╢п╩я▐ п╠я█п╨п╟п©п╟ п╢п╟п╫п╫я▀я┘ я┘я─п╟п╫п╦п╪я▀я┘ п╡ PostgreSQL
 #
 # For restore data type:
-# Восстановление производится с помощью команды: psql -d template1 -f backupfile
+# п▓п╬я│я│я┌п╟п╫п╬п╡п╩п╣п╫п╦п╣ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я│я▐ я│ п©п╬п╪п╬я┴я▄я▌ п╨п╬п╪п╟п╫п╢я▀: psql -d template1 -f backupfile
 #
 
 #-------------------
 # Name of backup, single word.
-# Имя бэкапа.
+# п≤п╪я▐ п╠я█п╨п╟п©п╟.
 #-------------------
 
-backup_name="test_host"
+backup_name="hostname_pgsql"
 
 #-------------------
 # Backup method:
 # full - backup full DB's structure and data.
 # db   - backup full DB's structure and data only for 'backup_db_list' databases.
-# notdb- backup full DB's structure and data for all DB's, except 
+# notdb- backup full DB's structure and data for all DB's, except
 #        data of 'backup_db_list' databases.
 #
-# Метод бэкапа:
-# full	- полный бэкап всех баз (рекомендуется), 
-#	 аналог запуска pg_dumpall или mysqldump --all-databases --all
+# п°п╣я┌п╬п╢ п╠я█п╨п╟п©п╟:
+# full	- п©п╬п╩п╫я▀п╧ п╠я█п╨п╟п© п╡я│п╣я┘ п╠п╟п╥ (я─п╣п╨п╬п╪п╣п╫п╢я┐п╣я┌я│я▐),
+#	 п╟п╫п╟п╩п╬пЁ п╥п╟п©я┐я│п╨п╟ pg_dumpall п╦п╩п╦ mysqldump --all-databases --all
 #
-# db    - бэкап только указанных в backup_db_list баз данных, записи по 
-#	  реконструкции баз и таблиц записываются для всех баз на SQL сервере.
-# notdb  - бэкап всех баз, кроме указанных в backup_db_list, записи по 
-#	   реконструкции баз и таблиц записываются для всех баз на SQL сервере.
-#          Возможно исключение из бэкапа  выборочных таблиц, тогда формат 
-#	   списка исключаемых таблиц задается в виде: 
+# db    - п╠я█п╨п╟п© я┌п╬п╩я▄п╨п╬ я┐п╨п╟п╥п╟п╫п╫я▀я┘ п╡ backup_db_list п╠п╟п╥ п╢п╟п╫п╫я▀я┘, п╥п╟п©п╦я│п╦ п©п╬
+#	  я─п╣п╨п╬п╫я│я┌я─я┐п╨я├п╦п╦ п╠п╟п╥ п╦ я┌п╟п╠п╩п╦я├ п╥п╟п©п╦я│я▀п╡п╟я▌я┌я│я▐ п╢п╩я▐ п╡я│п╣я┘ п╠п╟п╥ п╫п╟ SQL я│п╣я─п╡п╣я─п╣.
+# notdb  - п╠я█п╨п╟п© п╡я│п╣я┘ п╠п╟п╥, п╨я─п╬п╪п╣ я┐п╨п╟п╥п╟п╫п╫я▀я┘ п╡ backup_db_list, п╥п╟п©п╦я│п╦ п©п╬
+#	   я─п╣п╨п╬п╫я│я┌я─я┐п╨я├п╦п╦ п╠п╟п╥ п╦ я┌п╟п╠п╩п╦я├ п╥п╟п©п╦я│я▀п╡п╟я▌я┌я│я▐ п╢п╩я▐ п╡я│п╣я┘ п╠п╟п╥ п╫п╟ SQL я│п╣я─п╡п╣я─п╣.
+#          п▓п╬п╥п╪п╬п╤п╫п╬ п╦я│п╨п╩я▌я┤п╣п╫п╦п╣ п╦п╥ п╠я█п╨п╟п©п╟  п╡я▀п╠п╬я─п╬я┤п╫я▀я┘ я┌п╟п╠п╩п╦я├, я┌п╬пЁп╢п╟ я└п╬я─п╪п╟я┌
+#	   я│п©п╦я│п╨п╟ п╦я│п╨п╩я▌я┤п╟п╣п╪я▀я┘ я┌п╟п╠п╩п╦я├ п╥п╟п╢п╟п╣я┌я│я▐ п╡ п╡п╦п╢п╣:
 #	   "trash_db1 trash_db2:table1 trash_db2:table2"
-#          - производим бэкап всех баз, коме базы trash_db1 и таблиц table1 и 
-#	   table2 базы trash_db2.
-#          
+#          - п©я─п╬п╦п╥п╡п╬п╢п╦п╪ п╠я█п╨п╟п© п╡я│п╣я┘ п╠п╟п╥, п╨п╬п╪п╣ п╠п╟п╥я▀ trash_db1 п╦ я┌п╟п╠п╩п╦я├ table1 п╦
+#	   table2 п╠п╟п╥я▀ trash_db2.
+#
 #
 #-------------------
 
-backup_method="notdb"
+backup_method="full"
 
 #-------------------
 # List of databases (delimited by spaces)
-# Список включаемых или исключаемых из бэкапа баз, через пробел.
-# Таблицы указываются в виде: имя_базы:имя_таблицы
+# п║п©п╦я│п╬п╨ п╡п╨п╩я▌я┤п╟п╣п╪я▀я┘ п╦п╩п╦ п╦я│п╨п╩я▌я┤п╟п╣п╪я▀я┘ п╦п╥ п╠я█п╨п╟п©п╟ п╠п╟п╥, я┤п╣я─п╣п╥ п©я─п╬п╠п╣п╩.
+# п╒п╟п╠п╩п╦я├я▀ я┐п╨п╟п╥я▀п╡п╟я▌я┌я│я▐ п╡ п╡п╦п╢п╣: п╦п╪я▐_п╠п╟п╥я▀:п╦п╪я▐_я┌п╟п╠п╩п╦я├я▀
 #-------------------
 
 backup_db_list="aspseek trash:cache_table1 trash:cache_table2 mnogosearch"
 
 
 #-------------------
-# Auth information for MySQL.
-# Имя пользователя и пароль для соединения с Mysql, для PostgreSQL скрипт 
-# должен запускаться из-под пользователя с правами полного доступа к базам PostgreSQL.
+# Auth information for PgSQL.
+# п≤п╪я▐ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐ п╦ п©п╟я─п╬п╩я▄ п╢п╩я▐ я│п╬п╣п╢п╦п╫п╣п╫п╦я▐ я│ PostgreSQL
 #-------------------
+backup_sqluser=""
+backup_sqlpassword=""
+backup_sqlhost=""
+# default PG sqlport is 5432
+backup_sqlport="5432"
 
-backup_mysqluser=""
-backup_mysqlpassword=""
-
+# File $PGPASS_FILE format: hostname:port:database:username:password
+# don't change below line (п╫п╣ п╪п╣п╫я▐п╧я┌п╣ я│я┌я─п╬я┤п╨я┐ п╫п╦п╤п╣, п╣я│п╩п╦ п╫п╣ п©п╬п╫п╦п╪п╟п╣я┌п╣ п╥п╟я┤п╣п╪ п╬п╫п╟)!
+PGPASS_FILE="/root/.pgpass"
 
 #-------------------
-# Directory to store SQL backup. You must have enought free disk space to store 
+# Change to user (by su) before run 'pgdump' util
+# п≈п╟п©я┐я│п╨п╟я┌я▄ 'pgdump' п╦п╥ п©п╬п╢ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐:
+#backup_suuser="postgres"
+backup_suuser=""
+
+#
+# Chown by $backup_suuser the $backup_path directory
+# п║п╪п╣п╫п╦я┌я▄ п©я─п╟п╡п╟ п╢п╦я─п╣п╨я┌п╬я─п╦п╦ $backup_path п╦ $PGPASS_FILE я└п╟п╧п╩п╟
+# (п╩я┐я┤я┬п╣ я█я┌п╬ я│п╢п╣п╩п╟я┌я▄ п╡я─я┐я┤п╫я┐я▌, я┤я┌п╬ п╠я▀ п╡ п╢п╟п╩я▄п╫п╣п╧я┬п╣п╪ п╫п╣ п╠я▀п╩п╬ п╨п╬п╫я└п╩п╦п╨я┌п╬п╡)
+chown_by_suuser=0
+
+# п∙я│п╩п╦ п╦я│п©п╬п╩я▄п╥я┐п╣я┌я│я▐ $chown_by_suuser, я┌п╬ п╫я┐п╤п╫п╬ я│п╪п╣п╫п╦я┌я▄ PGPASS_FILE п╫п╟ '~$backup_suuser/.pgpass'
+# (я┌п╬ п╣я│я┌я▄ п╫п╟ '~postgres/.pgpass', п╟ п╩я┐я┤я┬п╣ я┌п╬я┤п╫я▀п╧ п©я┐я┌я▄ п╢п╬ п╢п╬п╪п╟я┬п╫п╣пЁп╬ п╨п╟я┌п╟п╩п╬пЁп╟ $backup_suuser)
+
+#-------------------
+# п║п╢п╣п╩п╟я┌я▄ п©п╬я│п╩п╣п╢п╫п╦п╧ WAL (Write-Ahead Logs) п╠п╟п╨п╟п© п╦ я│п╢п╣п╩п╟я┌я▄ rotate п╡ п╨п╬п╫я├п╣.
+# п÷п╣я─п╣п╢ я█я┌п╦п╪ п©п╬п╩п╬п╤п╦п╡ я█я┌п╦ я│п╨я─п╦п©я┌я▀ п╦п╥ п©п╟п©п╨п╦ 'contrib/psql_wal' п╢п╦я│я┌я─п╦п╠я┐я┌п╦п╡п╟ п╡ /usr/local/fsbackup/scripts
+# п·п╠я▐п╥п╟я┌п╣п╩я▄п╫п╬ п╫п╟я│я┌я─п╬п╦я┌я▄ я█я┌п╦ я│п╨я─п╦п©я┌я▀ (п©п╬п╢я─п╣п╢п╟п╨я┌п╦я─п╬п╡п╟п╡ п╦я┘ п╡п╫п╟я┤п╟п╩п╣)
+# п≤п╫я│я┌я─я┐п╨я├п╦п╦, я┤я┌п╬ я┌п╟п╨п╬п╣ WAL п╦ п╨п╟п╨ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╫п╟я┘п╬п╢я▐я┌я│я▐ п╡ п╨п╬п╪п╪п╣п╫я┌п╟я─п╦я▐я┘ я└п╟п╧п╩п╟ daily_pgsql_backup.sh
+wal_backup=0
+
+#-------------------
+# Directory to store SQL backup. You must have enought free disk space to store
 # all data from you SQL server.
-# Директория куда будет помещен бэкап данных с SQL сервера. 
-# Внимание !!! Должно быть достаточно свободного места для бэкапа всех 
-# выбранных БД.
+# п■п╦я─п╣п╨я┌п╬я─п╦я▐ п╨я┐п╢п╟ п╠я┐п╢п╣я┌ п©п╬п╪п╣я┴п╣п╫ п╠я█п╨п╟п© п╢п╟п╫п╫я▀я┘ я│ SQL я│п╣я─п╡п╣я─п╟.
+# п▓п╫п╦п╪п╟п╫п╦п╣ !!! п■п╬п╩п╤п╫п╬ п╠я▀я┌я▄ п╢п╬я│я┌п╟я┌п╬я┤п╫п╬ я│п╡п╬п╠п╬п╢п╫п╬пЁп╬ п╪п╣я│я┌п╟ п╢п╩я▐ п╠я█п╨п╟п©п╟ п╡я│п╣я┘
+# п╡я▀п╠я─п╟п╫п╫я▀я┘ п▒п■.
 #-------------------
 
 backup_path="/usr/local/fsbackup/sys_backup"
@@ -74,42 +103,79 @@ backup_path="/usr/local/fsbackup/sys_backup"
 
 #-------------------
 # Full path of postgresql programs.
-# Путь к программам postgresql 
+# п÷я┐я┌я▄ п╨ п©я─п╬пЁя─п╟п╪п╪п╟п╪ postgresql
 #-------------------
 
 backup_progdump_path="/usr/local/pgsql/bin"
+#backup_progdump_path="/usr/bin"
 
 #-------------------
-# Extra flags for pg_dump program. 
+# Extra flags for pg_dump program.
 # -D - Dump data as INSERT commands with  explicit  column names
-# Дополнительные параметры для pg_dump
-# -D - формировать бэкап данных в виде INSERT комманд, с указанием названий
-#      столбцов. Если скорость восстановления из бэкапа и размер бэкапа
-#      более важны, и совместимостью с другими СУБД можно пренебречь, 
-#      используйте: extra_pg_dump_flag=""
+# п■п╬п©п╬п╩п╫п╦я┌п╣п╩я▄п╫я▀п╣ п©п╟я─п╟п╪п╣я┌я─я▀ п╢п╩я▐ pg_dump
+# -D - я└п╬я─п╪п╦я─п╬п╡п╟я┌я▄ п╠я█п╨п╟п© п╢п╟п╫п╫я▀я┘ п╡ п╡п╦п╢п╣ INSERT п╨п╬п╪п╪п╟п╫п╢, я│ я┐п╨п╟п╥п╟п╫п╦п╣п╪ п╫п╟п╥п╡п╟п╫п╦п╧
+#      я│я┌п╬п╩п╠я├п╬п╡. п∙я│п╩п╦ я│п╨п╬я─п╬я│я┌я▄ п╡п╬я│я│я┌п╟п╫п╬п╡п╩п╣п╫п╦я▐ п╦п╥ п╠я█п╨п╟п©п╟ п╦ я─п╟п╥п╪п╣я─ п╠я█п╨п╟п©п╟
+#      п╠п╬п╩п╣п╣ п╡п╟п╤п╫я▀, п╦ я│п╬п╡п╪п╣я│я┌п╦п╪п╬я│я┌я▄я▌ я│ п╢я─я┐пЁп╦п╪п╦ п║пёп▒п■ п╪п╬п╤п╫п╬ п©я─п╣п╫п╣п╠я─п╣я┤я▄,
+#      п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣: extra_pg_dump_flag=""
+# -s - Dump only the object definitions (schema), not data.
+#  -h, --host=п≤п°п╞           п╦п╪я▐ я│п╣я─п╡п╣я─п╟ п╠п╟п╥ п╢п╟п╫п╫я▀я┘ п╦п╩п╦ п╨п╟я┌п╟п╩п╬пЁ я│п╬п╨п╣я┌п╬п╡
+#  -l, --database=п≤п°п╞_п▒п■    п╡я▀п╠п╬я─ п╢я─я┐пЁп╬п╧ п╠п╟п╥я▀ п╢п╟п╫п╫я▀я┘ п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌
+#  -p, --port=п÷п·п═п╒          п╫п╬п╪п╣я─ п©п╬я─я┌п╟ я│п╣я─п╡п╣я─п╟ п▒п■
+#  -U, --username=п≤п°п╞       п╦п╪я▐ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐ п╠п╟п╥ п╢п╟п╫п╫я▀я┘
+#  -w, --no-password        п╫п╣ п╥п╟п©я─п╟я┬п╦п╡п╟я┌я▄ п©п╟я─п╬п╩я▄
+#  -W, --password           п╥п╟п©я─п╟я┬п╦п╡п╟я┌я▄ п©п╟я─п╬п╩я▄ п╡я│п╣пЁп╢п╟ (п╬п╠я▀я┤п╫п╬ п╫п╣ я┌я─п╣п╠я┐п╣я┌я│я▐)
 #-------------------
 
 extra_pg_dump_flag="-D"
+#extra_pg_dump_flag=""
 
 ############################################################################
+
+if [ "_$backup_sqluser" != "_" ]; then
+        # п╥п╟п©п╬п╩п╫я▐п╣п╪ $PGPASS_FILE п╢п╩я▐ п╟п╡я┌п╬я─п╦п╥п╟я├п╦п╦
+	echo "$backup_sqlhost:$backup_sqlport:*:$backup_sqluser:$backup_sqlpassword" > $PGPASS_FILE
+	chmod 0600 $PGPASS_FILE
+
+	# п╢п╬п╠п╟п╡п╩я▐п╣п╪ п╟п╡я┌п╬я─п╦п╥п╟я├п╦я▌ п╡ п©п╟я─п╟п╪п╣я┌я─я▀
+	extra_pg_dump_flag="$extra_pg_dump_flag -U $backup_sqluser"
+	if [ "_$backup_sqlhost" != "_" ]; then
+		extra_pg_dump_flag="$extra_pg_dump_flag -h $backup_sqlhost"
+	fi
+	if [ "_$backup_sqlport" != "_" ]; then
+		extra_pg_dump_flag="$extra_pg_dump_flag -p $backup_sqlport"
+	fi
+fi
+
+if [ "_$backup_suuser" != "_" && $chown_by_suuser -eq 1 ]; then
+	chown -R $backup_suuser $backup_path
+        chown $backup_suuser $PGPASS_FILE
+fi
 
 if [ -n "$backup_progdump_path" ]; then
     backup_progdump_path="$backup_progdump_path/"
 fi
 
-#-------------------------------------------------------------------------
-# Полный бэкап для Postgresql
-if [ "_$backup_method" = "_full" ]; then
-    echo "Creating full backup of all PostgreSQL databases."
-#    ${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
-    ${backup_progdump_path}pg_dumpall $extra_pg_dump_flag|gzip > $backup_path/$backup_name-pgsql.gz
-    exit
+#------------------------
 
+if [ $wal_backup -eq 1 ]; then
+    echo "Creating last daily backup before new full backup"
+    /usr/local/fsbackup/scripts/daily_pgsql_backup.sh "force"
 fi
 
 #-------------------------------------------------------------------------
-# Бэкап указанных баз для Postgresql
-if [ "_$backup_method" = "_db" ]; then
+# п÷п╬п╩п╫я▀п╧ п╠я█п╨п╟п© п╢п╩я▐ Postgresql
+if [ "_$backup_method" = "_full" ]; then
+    echo "Creating full backup of all PostgreSQL databases."
+    if [ "_$backup_sqluser" != "_" ]; then
+        #${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
+        su - ${backup_suuser} -c ${backup_progdump_path}/pg_dumpall $extra_pg_dump_flag > $backup_path/$backup_name-pgsql
+    else
+        ${backup_progdump_path}/pg_dumpall $extra_pg_dump_flag > $backup_path/$backup_name-pgsql
+    fi
+
+#-------------------------------------------------------------------------
+# п▒я█п╨п╟п© я┐п╨п╟п╥п╟п╫п╫я▀я┘ п╠п╟п╥ п╢п╩я▐ Postgresql
+elif [ "_$backup_method" = "_db" ]; then
     echo "Creating full backup of $backup_db_list PostgreSQL databases."
 #    ${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
     cat /dev/null > $backup_path/$backup_name-pgsql
@@ -117,18 +183,24 @@ if [ "_$backup_method" = "_db" ]; then
     for cur_db in $backup_db_list; do
 	echo "Dumping $cur_db..."
 	cur_db=`echo "$cur_db" | awk -F':' '{if (\$2 != ""){print "-t", \$2, \$1}else{print \$1}}'`
-	${backup_progdump_path}pg_dump $extra_pg_dump_flag $cur_db >> $backup_path/$backup_name-pgsql
+	if [ "_$backup_sqluser" != "_" ]; then
+		chown $backup_suuser $backup_path/$backup_name-pgsql
+		su - ${backup_suuser} -c ${backup_progdump_path}pg_dump $extra_pg_dump_flag $cur_db >> $backup_path/$backup_name-pgsql
+        else
+		${backup_progdump_path}pg_dump $extra_pg_dump_flag $cur_db >> $backup_path/$backup_name-pgsql
+	fi
     done
     gzip -f $backup_path/$backup_name-pgsql
 
-    exit
-
-fi
-
 #-------------------------------------------------------------------------
-# Бэкап всех баз кроме указанных для Postgresql
-if [ "_$backup_method" = "_notdb" ]; then
+# п▒я█п╨п╟п© п╡я│п╣я┘ п╠п╟п╥ п╨я─п╬п╪п╣ я┐п╨п╟п╥п╟п╫п╫я▀я┘ п╢п╩я▐ Postgresql
+elif [ "_$backup_method" = "_notdb" ]; then
     echo "Creating full backup of all PostgreSQL databases except databases $backup_db_list."
+    if [ "_$backup_sqluser" != "_" ]; then
+        # TODO: п╫я┐п╤п╫п╬ п╢п╬п╢п╣п╩п╟я┌я▄ я█я┌п╬ п╪п╣я│я┌п╬ п╫п╦п╤п╣... п╟ п©п╬п╨п╟ п╥п╟пЁп╩я┐я┬п╨п╟ :)
+        echo "The '$backup_method' method does not support the 'backup_sqluser' parameter, yet. Sorry, exit..."
+        exit 1
+    fi
 #    ${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
     cat /dev/null > $backup_path/$backup_name-pgsql
 
@@ -136,7 +208,7 @@ if [ "_$backup_method" = "_notdb" ]; then
 
 	grep_flag=`echo " $backup_db_list"| grep " $cur_db:"`
 	if [ -n "$grep_flag" ]; then
-# Исключение таблиц для данной базы
+# п≤я│п╨п╩я▌я┤п╣п╫п╦п╣ я┌п╟п╠п╩п╦я├ п╢п╩я▐ п╢п╟п╫п╫п╬п╧ п╠п╟п╥я▀
 	    for cur_db_table in `${backup_progdump_path}psql -A -q -t -c "select tablename from pg_tables WHERE tablename NOT LIKE 'pg\_%' AND tablename NOT LIKE 'sql\_%';" $cur_db`; do
 
 		flag=1
@@ -144,7 +216,7 @@ if [ "_$backup_method" = "_notdb" ]; then
 		    if [ "_$cur_ignore" = "_$cur_db:$cur_db_table" ]; then
 			flag=0
 		    fi
-    		done
+		done
 
 		if [ $flag -gt 0 ]; then
 		    echo "Dumping $cur_db:$cur_db_table..."
@@ -154,13 +226,13 @@ if [ "_$backup_method" = "_notdb" ]; then
 		fi
 	    done
 	else
-# Исключение базы
+# п≤я│п╨п╩я▌я┤п╣п╫п╦п╣ п╠п╟п╥я▀
 	    flag=1
 	    for cur_ignore in $backup_db_list; do
 		if [ "_$cur_ignore" = "_$cur_db" ]; then
 		    flag=0
 		fi
-    	    done
+	    done
 
 	    if [ $flag -gt 0 ]; then
 		echo "Dumping $cur_db..."
@@ -171,9 +243,14 @@ if [ "_$backup_method" = "_notdb" ]; then
 	fi
     done
     gzip -f $backup_path/$backup_name-pgsql
-    exit
+else
+    # Unknown $backup_method
+    echo "Configuration error. Not valid parameters in backup_method."
+    exit 1
 fi
 
-echo "Configuration error. Not valid parameters in backup_method or backup_sqltype."
-
+if [ $wal_backup -eq 1 ]; then
+    # rotate daily backups (prepare for new WAL files)
+    /usr/local/fsbackup/scripts/daily_pgsql_rotate.pl "do"
+fi
 

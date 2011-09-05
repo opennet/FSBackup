@@ -1,10 +1,10 @@
 #!/bin/sh
-# Полный бэкап системы на запасной диск
+# п÷п╬п╩п╫я▀п╧ п╠я█п╨п╟п© я│п╦я│я┌п╣п╪я▀ п╫п╟ п╥п╟п©п╟я│п╫п╬п╧ п╢п╦я│п╨
 
-# Предотвращаем съедание процессом всей памяти.
+# п÷я─п╣п╢п╬я┌п╡я─п╟я┴п╟п╣п╪ я│я┼п╣п╢п╟п╫п╦п╣ п©я─п╬я├п╣я│я│п╬п╪ п╡я│п╣п╧ п©п╟п╪я▐я┌п╦.
 ulimit -v 200000
 
-# Исключаем одновременный запуск двух rsync процессов.
+# п≤я│п╨п╩я▌я┤п╟п╣п╪ п╬п╢п╫п╬п╡я─п╣п╪п╣п╫п╫я▀п╧ п╥п╟п©я┐я│п╨ п╢п╡я┐я┘ rsync п©я─п╬я├п╣я│я│п╬п╡.
 IDLE=`ps -auxwww | grep -E "root.*rsync" | grep -vE "grep|rsync_backup"`
 if [ "$IDLE" != "" ];  then
     echo "FATAL DUP"| mail -s "FATAL RSYNC BACKUP DUP" admins@testhost.ru
@@ -15,7 +15,7 @@ date
 #/sbin/mount -u -w /backup
 #/bin/mount -o remount,rw /backup
 
-#Сохраняем список всех директорий и их параметров
+#п║п╬я┘я─п╟п╫я▐п╣п╪ я│п©п╦я│п╬п╨ п╡я│п╣я┘ п╢п╦я─п╣п╨я┌п╬я─п╦п╧ п╦ п╦я┘ п©п╟я─п╟п╪п╣я┌я─п╬п╡
 /usr/local/fsbackup/scripts/create_dir_list.pl / > /usr/local/fsbackup/sys_backup/dir_list.txt
 
 #/usr/local/bin/rsync -a -v --delete --delete-excluded --backup --exclude-from=/etc/rsync_backup.exclude / /backup
@@ -27,7 +27,7 @@ if [ $RETCODE -ne 0 -a $RETCODE -ne 24 ]; then
 fi
 echo RET: $RETCODE
 
-# Дополнительный бэкап почтовых ящиков (без резервирования старых копий)
+# п■п╬п©п╬п╩п╫п╦я┌п╣п╩я▄п╫я▀п╧ п╠я█п╨п╟п© п©п╬я┤я┌п╬п╡я▀я┘ я▐я┴п╦п╨п╬п╡ (п╠п╣п╥ я─п╣п╥п╣я─п╡п╦я─п╬п╡п╟п╫п╦я▐ я│я┌п╟я─я▀я┘ п╨п╬п©п╦п╧)
 /usr/local/bin/rsync -a -v --delete /var/mail /backup/var/
 
 /bin/chmod 0700 /backup

@@ -4,14 +4,14 @@
 # http://www.opennet.ru/dev/fsbackup/
 # Copyright (c) 2001-2002 by Maxim Chirkov. <mc@tyumen.ru>
 #
-# Ключи:
-# -n - создаем новый архив независимо от состояния хэша.
-# -f - full_backup - полный бэкап в архив, без хэша.
-# -h - hash - только генерация хэша, без помещения файлов в архив.
-# -c - clean - очиска хранилища с инкрементальным бэкапом и создание нового бэкапа.
+# п п╩я▌я┤п╦:
+# -n - я│п╬п╥п╢п╟п╣п╪ п╫п╬п╡я▀п╧ п╟я─я┘п╦п╡ п╫п╣п╥п╟п╡п╦я│п╦п╪п╬ п╬я┌ я│п╬я│я┌п╬я▐п╫п╦я▐ я┘я█я┬п╟.
+# -f - full_backup - п©п╬п╩п╫я▀п╧ п╠я█п╨п╟п© п╡ п╟я─я┘п╦п╡, п╠п╣п╥ я┘я█я┬п╟.
+# -h - hash - я┌п╬п╩я▄п╨п╬ пЁп╣п╫п╣я─п╟я├п╦я▐ я┘я█я┬п╟, п╠п╣п╥ п©п╬п╪п╣я┴п╣п╫п╦я▐ я└п╟п╧п╩п╬п╡ п╡ п╟я─я┘п╦п╡.
+# -c - clean - п╬я┤п╦я│п╨п╟ я┘я─п╟п╫п╦п╩п╦я┴п╟ я│ п╦п╫п╨я─п╣п╪п╣п╫я┌п╟п╩я▄п╫я▀п╪ п╠я█п╨п╟п©п╬п╪ п╦ я│п╬п╥п╢п╟п╫п╦п╣ п╫п╬п╡п╬пЁп╬ п╠я█п╨п╟п©п╟.
 
 #############################################
-use constant DB_DEF_CACHE_SIZE => 4096000; # Размер кэша для размежения хэша в памяти
+use constant DB_DEF_CACHE_SIZE => 4096000; # п═п╟п╥п╪п╣я─ п╨я█я┬п╟ п╢п╩я▐ я─п╟п╥п╪п╣п╤п╣п╫п╦я▐ я┘я█я┬п╟ п╡ п©п╟п╪я▐я┌п╦
 
 use POSIX;
 use File::Find;
@@ -31,7 +31,7 @@ my %active_hash_new;
 my $cfg_new_flag = 0;
 my $cfg_clean_flag = 0;
 my $config = 0;
-my $cur_backup_size = 1536; # Размер блока tar
+my $cur_backup_size = 1536; # п═п╟п╥п╪п╣я─ п╠п╩п╬п╨п╟ tar
 my $backup_file_base;
 my $prog_pgp_filter;
 my $prog_gzip_filter;
@@ -51,16 +51,16 @@ my $db_hashinfo;
 my $db_hashinfo2;
 my $file;
 my @volume_position=(0);
-my @fs_path=();	       #  /dir[/file] - путь к файлу/директории для бэкапа.
-my @fs_notpath=();     #  ! - отрицание пути, не помещать в бэкап. Всегда должен быть первым символом.
-my @fs_mask=();        #  =~ - маска для файла или директории, а не абсолютный путь. Первый или второй символ.
-my @fs_filemask=();    #  f~ - маска для файла. Первый или второй символ.
-my @fs_dirmask=();     #  d~ - маска для директории. Первый или второй символ.
-my @fs_notmask=();     #  =! - "НЕ" маска для файла или директории, а не абсолютный путь. Первый или второй символ.
-my @fs_notfilemask=(); #  f! - "НЕ" маска для файла. Первый или второй символ.
-my @fs_notdirmask=();  #  d! - "НЕ" маска для директории. Первый или второй символ.
+my @fs_path=();	       #  /dir[/file] - п©я┐я┌я▄ п╨ я└п╟п╧п╩я┐/п╢п╦я─п╣п╨я┌п╬я─п╦п╦ п╢п╩я▐ п╠я█п╨п╟п©п╟.
+my @fs_notpath=();     #  ! - п╬я┌я─п╦я├п╟п╫п╦п╣ п©я┐я┌п╦, п╫п╣ п©п╬п╪п╣я┴п╟я┌я▄ п╡ п╠я█п╨п╟п©. п▓я│п╣пЁп╢п╟ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ п©п╣я─п╡я▀п╪ я│п╦п╪п╡п╬п╩п╬п╪.
+my @fs_mask=();        #  =~ - п╪п╟я│п╨п╟ п╢п╩я▐ я└п╟п╧п╩п╟ п╦п╩п╦ п╢п╦я─п╣п╨я┌п╬я─п╦п╦, п╟ п╫п╣ п╟п╠я│п╬п╩я▌я┌п╫я▀п╧ п©я┐я┌я▄. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
+my @fs_filemask=();    #  f~ - п╪п╟я│п╨п╟ п╢п╩я▐ я└п╟п╧п╩п╟. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
+my @fs_dirmask=();     #  d~ - п╪п╟я│п╨п╟ п╢п╩я▐ п╢п╦я─п╣п╨я┌п╬я─п╦п╦. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
+my @fs_notmask=();     #  =! - "п²п∙" п╪п╟я│п╨п╟ п╢п╩я▐ я└п╟п╧п╩п╟ п╦п╩п╦ п╢п╦я─п╣п╨я┌п╬я─п╦п╦, п╟ п╫п╣ п╟п╠я│п╬п╩я▌я┌п╫я▀п╧ п©я┐я┌я▄. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
+my @fs_notfilemask=(); #  f! - "п²п∙" п╪п╟я│п╨п╟ п╢п╩я▐ я└п╟п╧п╩п╟. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
+my @fs_notdirmask=();  #  d! - "п²п∙" п╪п╟я│п╨п╟ п╢п╩я▐ п╢п╦я─п╣п╨я┌п╬я─п╦п╦. п÷п╣я─п╡я▀п╧ п╦п╩п╦ п╡я┌п╬я─п╬п╧ я│п╦п╪п╡п╬п╩.
 
-# ------------- Обработка параметров командной строки
+# ------------- п·п╠я─п╟п╠п╬я┌п╨п╟ п©п╟я─п╟п╪п╣я┌я─п╬п╡ п╨п╬п╪п╟п╫п╢п╫п╬п╧ я│я┌я─п╬п╨п╦
 
 if ($ARGV[0] eq "-n" || $ARGV[0] eq "-h" || $ARGV[0] eq "-f" || $ARGV[0] eq "-c"){
     $cfg_new_flag=1;
@@ -81,9 +81,9 @@ if ( ! -d $cfg_cache_dir){
     die "\$cfg_cache_dir ($cfg_cache_dir) not found. Set \$cfg_cache_dir varisble in fsbackup.pl\n";
 }
 
-$cfg_time_limit *= 60 * 60 * 24; # Дни в секунды.
-$cfg_size_limit *= 1024;	 # Килобайты в байты.
-$cfg_maximum_archive_size *= 1024;	 # Килобайты в байты.
+$cfg_time_limit *= 60 * 60 * 24; # п■п╫п╦ п╡ я│п╣п╨я┐п╫п╢я▀.
+$cfg_size_limit *= 1024;	 # п п╦п╩п╬п╠п╟п╧я┌я▀ п╡ п╠п╟п╧я┌я▀.
+$cfg_maximum_archive_size *= 1024;	 # п п╦п╩п╬п╠п╟п╧я┌я▀ п╡ п╠п╟п╧я┌я▀.
 
 if (-d $cfg_root_path){
     chdir($cfg_root_path);
@@ -104,7 +104,7 @@ if ($ARGV[0] eq "-c" ){
     $cfg_clean_flag=0;
 }
 
-#------------------- Проверяем переменные в файле конфигурации.
+#------------------- п÷я─п╬п╡п╣я─я▐п╣п╪ п©п╣я─п╣п╪п╣п╫п╫я▀п╣ п╡ я└п╟п╧п╩п╣ п╨п╬п╫я└п╦пЁя┐я─п╟я├п╦п╦.
 if ($cfg_backup_name !~ /^[\w\d\_]+$/){
     die "Found illegal characters in $cfg_backup_name ($cfg_backup_name).";
 }
@@ -170,11 +170,11 @@ if (! -d "$cfg_cache_dir/$cfg_backup_name"){
     mkdir("$cfg_cache_dir/$cfg_backup_name", 0700);
 }
 
-# ---------- Активируем FTP соединение 
+# ---------- п░п╨я┌п╦п╡п╦я─я┐п╣п╪ FTP я│п╬п╣п╢п╦п╫п╣п╫п╦п╣ 
 
 ftp_connect();
 
-#----------- Вычисляем уровень инкрементальности.
+#----------- п▓я▀я┤п╦я│п╩я▐п╣п╪ я┐я─п╬п╡п╣п╫я▄ п╦п╫п╨я─п╣п╪п╣п╫я┌п╟п╩я▄п╫п╬я│я┌п╦.
 if ($cfg_increment_level != 0 && $cfg_backup_style eq "backup"){
     $cur_increment_level=0;
 
@@ -211,10 +211,10 @@ if ($cfg_increment_level != 0 && $cfg_backup_style eq "backup"){
     print "Current increment number: $cur_increment_level\n" if ($cfg_verbose == &VERB_ALL);
 }
 ################################################
-#----------- Считываем хэш в память.
+#----------- п║я┤п╦я┌я▀п╡п╟п╣п╪ я┘я█я┬ п╡ п©п╟п╪я▐я┌я▄.
 
 if ( (-f "$cfg_cache_dir/$cfg_backup_name/.hash" || $cfg_type ne "local" ) && $cfg_new_flag == 0){
-# Считываем текущий хеш в память.
+# п║я┤п╦я┌я▀п╡п╟п╣п╪ я┌п╣п╨я┐я┴п╦п╧ я┘п╣я┬ п╡ п©п╟п╪я▐я┌я▄.
 
 if ( $cfg_type eq "local"){
     rename ("$cfg_cache_dir/$cfg_backup_name/.hash", "$cfg_cache_dir/$cfg_backup_name/.hash.last");
@@ -236,37 +236,37 @@ if ( $cfg_type eq "local"){
 
 }
 
-# Закрываем ftp соединение. Следующий блок может выполняться гораздо дольше 
-# чем таймаут ftp.
+# п≈п╟п╨я─я▀п╡п╟п╣п╪ ftp я│п╬п╣п╢п╦п╫п╣п╫п╦п╣. п║п╩п╣п╢я┐я▌я┴п╦п╧ п╠п╩п╬п╨ п╪п╬п╤п╣я┌ п╡я▀п©п╬п╩п╫я▐я┌я▄я│я▐ пЁп╬я─п╟п╥п╢п╬ п╢п╬п╩я▄я┬п╣ 
+# я┤п╣п╪ я┌п╟п╧п╪п╟я┐я┌ ftp.
 if ( $cfg_type eq "remote_ftp"){
     $ftp->quit;
 }
-#Создаем новый хеш.
+#п║п╬п╥п╢п╟п╣п╪ п╫п╬п╡я▀п╧ я┘п╣я┬.
 unlink("$cfg_cache_dir/$cfg_backup_name/.hash");
 $db_hashinfo2 = new DB_File::HASHINFO ;
 $db_hashinfo2->{'cachesize'} =  100000;
 $dbobj_new = tie(%active_hash_new, "DB_File", "$cfg_cache_dir/$cfg_backup_name/.hash", O_RDWR|O_CREAT, 0644, $db_hashinfo2) || print "Can't create or open DB File!\n";
 
-# Создаем список файлов для помещения в архив.
+# п║п╬п╥п╢п╟п╣п╪ я│п©п╦я│п╬п╨ я└п╟п╧п╩п╬п╡ п╢п╩я▐ п©п╬п╪п╣я┴п╣п╫п╦я▐ п╡ п╟я─я┘п╦п╡.
 open (LIST, ">$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.list")|| print "Can't create list file ($cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.list).\n";
 flock (LIST, 2);
 
-# Список с указанием размеров файлов.
+# п║п©п╦я│п╬п╨ я│ я┐п╨п╟п╥п╟п╫п╦п╣п╪ я─п╟п╥п╪п╣я─п╬п╡ я└п╟п╧п╩п╬п╡.
 open (LIST_SIZE, ">$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.lsize")|| print "Can't create list file ($cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.lsize).\n";
 flock (LIST_SIZE, 2);
 
-# Создаем список директорий в архиве.
+# п║п╬п╥п╢п╟п╣п╪ я│п©п╦я│п╬п╨ п╢п╦я─п╣п╨я┌п╬я─п╦п╧ п╡ п╟я─я┘п╦п╡п╣.
 open (DIRS, ">$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.dir")|| print "Can't create list file ($cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.dir).\n";
 flock (DIRS, 2);
 
-# Считываем список подлежащих бэкапу директорий в память.
+# п║я┤п╦я┌я▀п╡п╟п╣п╪ я│п©п╦я│п╬п╨ п©п╬п╢п╩п╣п╤п╟я┴п╦я┘ п╠я█п╨п╟п©я┐ п╢п╦я─п╣п╨я┌п╬я─п╦п╧ п╡ п©п╟п╪я▐я┌я▄.
 
 while(<DATA>){
     chomp;
     $cur_path = $_;
-    # Разрешаем комментарий в конце
+    # п═п╟п╥я─п╣я┬п╟п╣п╪ п╨п╬п╪п╪п╣п╫я┌п╟я─п╦п╧ п╡ п╨п╬п╫я├п╣
     $cur_path =~ s/^([^#]+)\#?.*$/$1/;  
-    # Режем пограничные пробелы
+    # п═п╣п╤п╣п╪ п©п╬пЁя─п╟п╫п╦я┤п╫я▀п╣ п©я─п╬п╠п╣п╩я▀
     $cur_path =~ s/^\s*([^\s\t]?.*)$/$1/;
     $cur_path =~ s/^(.*[^\s\t])\s*$/$1/;  
 
@@ -307,20 +307,20 @@ while(<DATA>){
 }
 
 #--------------------------------------------------------------------
-# Последовательно просматририваем весь список директорий отмеченных для бэкапа
+# п÷п╬я│п╩п╣п╢п╬п╡п╟я┌п╣п╩я▄п╫п╬ п©я─п╬я│п╪п╟я┌я─п╦я─п╦п╡п╟п╣п╪ п╡п╣я│я▄ я│п©п╦я│п╬п╨ п╢п╦я─п╣п╨я┌п╬я─п╦п╧ п╬я┌п╪п╣я┤п╣п╫п╫я▀я┘ п╢п╩я▐ п╠я█п╨п╟п©п╟
 
 
 foreach $cur_pathitem (@fs_path){
     print "Adding $cur_pathitem....\n" if ($cfg_verbose == &VERB_ALL);
     find (\&add_to_backup, $cur_pathitem);
-    chdir($cfg_root_path); # Переходим в корень, так как find делает chdir.
+    chdir($cfg_root_path); # п÷п╣я─п╣я┘п╬п╢п╦п╪ п╡ п╨п╬я─п╣п╫я▄, я┌п╟п╨ п╨п╟п╨ find п╢п╣п╩п╟п╣я┌ chdir.
     print "done\n" if ($cfg_verbose == &VERB_ALL);
 }
 close (LIST);
 close (LIST_SIZE);
 close (DIRS);
 #------------
-# Составляем список удаленных файлов.
+# п║п╬я│я┌п╟п╡п╩я▐п╣п╪ я│п©п╦я│п╬п╨ я┐п╢п╟п╩п╣п╫п╫я▀я┘ я└п╟п╧п╩п╬п╡.
 
     open (DEL, ">$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.del")|| print "Can't create list file ($cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.del).\n";
     flock (DEL, 2);
@@ -334,19 +334,19 @@ close (DIRS);
     }
     close(DEL);
 
-# Записываем хэш на диск.
+# п≈п╟п©п╦я│я▀п╡п╟п╣п╪ я┘я█я┬ п╫п╟ п╢п╦я│п╨.
 $dbobj_new->sync();
 untie %active_hash_new;
 untie %active_hash_last;
 
 
-# Активируем FTP соединение второй раз.
+# п░п╨я┌п╦п╡п╦я─я┐п╣п╪ FTP я│п╬п╣п╢п╦п╫п╣п╫п╦п╣ п╡я┌п╬я─п╬п╧ я─п╟п╥.
 ftp_connect();
 
 #------------
-# Если только обновляем хэш, то записываем его и выходим.
+# п∙я│п╩п╦ я┌п╬п╩я▄п╨п╬ п╬п╠п╫п╬п╡п╩я▐п╣п╪ я┘я█я┬, я┌п╬ п╥п╟п©п╦я│я▀п╡п╟п╣п╪ п╣пЁп╬ п╦ п╡я▀я┘п╬п╢п╦п╪.
 
-if ($cfg_backup_style eq "hash"){ # Только создать хэшь без архивирования.
+if ($cfg_backup_style eq "hash"){ # п╒п╬п╩я▄п╨п╬ я│п╬п╥п╢п╟я┌я▄ я┘я█я┬я▄ п╠п╣п╥ п╟я─я┘п╦п╡п╦я─п╬п╡п╟п╫п╦я▐.
 
     if ( $cfg_type eq "local"){
 	system( "cp -f $cfg_cache_dir/$cfg_backup_name/.hash $cfg_local_path/.hash") == 0 || print "Local FS copy hash failed: $?";
@@ -360,7 +360,7 @@ if ($cfg_backup_style eq "hash"){ # Только создать хэшь без архивирования.
 }
 
 #------------
-# Архивируем и передаем в хранилище.
+# п░я─я┘п╦п╡п╦я─я┐п╣п╪ п╦ п©п╣я─п╣п╢п╟п╣п╪ п╡ я┘я─п╟п╫п╦п╩п╦я┴п╣.
 
 if ($list_lines_cnt == 0 && $del_lines_cnt == 0){
     print "WARNING: Nothing to backup.\n" if ($cfg_verbose >= &VERB_ALL);
@@ -370,7 +370,7 @@ if ( $cfg_type eq "local"){
     
     print "Storing local backup...\n" if ($cfg_verbose == &VERB_ALL);
     if ($cfg_backup_style eq "sync"){
-	if ($cfg_clean_flag == 1){ # Удалить старые копии
+	if ($cfg_clean_flag == 1){ # пёп╢п╟п╩п╦я┌я▄ я│я┌п╟я─я▀п╣ п╨п╬п©п╦п╦
 	    print "WARNING: If you really shure to delete $cfg_local_path before sync operatioun uncomment line 'system( \"find \$cfg_local_path ! -path '\$cfg_local_path' -maxdepth 1 -exec \$prog_rm -rf \{\} \\;\");'" if ($cfg_verbose >= &VERB_ALL);
 #    	    system( "find $cfg_local_path ! -path '$cfg_local_path' -maxdepth 1 -exec $prog_rm -rf \{\} \\;");
 	}
@@ -381,7 +381,7 @@ if ( $cfg_type eq "local"){
 	system( "cp -f $cfg_cache_dir/$cfg_backup_name/.hash $cfg_local_path/$backup_file_base.hash") == 0 || print "Local FS copy failed: $?\n";
 
     } else {
-	if ($cfg_clean_flag == 1){ # Удалить старые копии
+	if ($cfg_clean_flag == 1){ # пёп╢п╟п╩п╦я┌я▄ я│я┌п╟я─я▀п╣ п╨п╬п©п╦п╦
 	    if ($cfg_save_old_backup == 0){
 		system( "$prog_rm -f $cfg_local_path/*");
 	    } else {
@@ -398,7 +398,7 @@ if ( $cfg_type eq "local"){
 	system( "cp -f $cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.dir $cfg_local_path/$backup_file_base.dir") == 0 || print "Local FS .dir copy failed: $?\n";
 	system( "cp -f $cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.del $cfg_local_path/$backup_file_base.del") == 0 || print "Local FS .del copy failed: $?\n";
 	system( "cp -f $cfg_cache_dir/$cfg_backup_name/.hash $cfg_local_path/$backup_file_base.hash") == 0 || print "Local FS .hash copy failed: $?\n";
-	# Обрабатываем разбиение на тома
+	# п·п╠я─п╟п╠п╟я┌я▀п╡п╟п╣п╪ я─п╟п╥п╠п╦п╣п╫п╦п╣ п╫п╟ я┌п╬п╪п╟
 	for ($arc_block_level=0; $arc_block_level <= $#volume_position; $arc_block_level++){
 	    my $tmp_list_file = crate_tmp_list($arc_block_level, $volume_position[$arc_block_level], $volume_position[$arc_block_level+1], "$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.list");
 	    system( "$prog_tar -c -f - -T $tmp_list_file $prog_gzip_filter $prog_pgp_filter > $cfg_local_path/$backup_file_base-$arc_block_level.tar${arc_ext}") == 0 || print "Local FS tar backup failed: $?\n";
@@ -408,7 +408,7 @@ if ( $cfg_type eq "local"){
 } elsif ( $cfg_type eq "remote_ssh"){
     print "Storing remote ssh backup...\n" if ($cfg_verbose == &VERB_ALL);
     if ($cfg_backup_style eq "sync"){
-	if ($cfg_clean_flag == 1){ # Удалить старые копии
+	if ($cfg_clean_flag == 1){ # пёп╢п╟п╩п╦я┌я▄ я│я┌п╟я─я▀п╣ п╨п╬п©п╦п╦
 	    system( "$prog_ssh -l $cfg_remote_login $cfg_remote_host find $cfg_remote_path ! -path '$cfg_remote_path' -maxdepth 1 -exec rm -rf \{\} \\;");
 	}
 	system( "cat $cfg_cache_dir/$cfg_backup_name/.hash | $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/.hash'") == 0 || print "SSH connection failed (store .hash): $?\n";
@@ -429,7 +429,7 @@ if ( $cfg_type eq "local"){
 	}
 	close(DEL);
     } else {
-	if ($cfg_clean_flag == 1){ # Удалить старые копии
+	if ($cfg_clean_flag == 1){ # пёп╢п╟п╩п╦я┌я▄ я│я┌п╟я─я▀п╣ п╨п╬п©п╦п╦
 
 	    if ($cfg_save_old_backup == 0){
 		system( "$prog_ssh -l $cfg_remote_login $cfg_remote_host rm -f $cfg_remote_path/*");
@@ -446,7 +446,7 @@ if ( $cfg_type eq "local"){
         system( "cat $cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.del | $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/$backup_file_base.del'") == 0 || print "SSH connection failed (copy .del): $?\n";
         system( "cat $cfg_cache_dir/$cfg_backup_name/.hash | $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/$backup_file_base.hash'") == 0 || print "SSH connection failed (copy .hash): $?\n";
 	system( "cat $cfg_cache_dir/$cfg_backup_name/.hash | $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/.hash'") == 0 || print "SSH connection failed (cache .hash): $?\n";
-	# Обрабатываем разбиение на тома
+	# п·п╠я─п╟п╠п╟я┌я▀п╡п╟п╣п╪ я─п╟п╥п╠п╦п╣п╫п╦п╣ п╫п╟ я┌п╬п╪п╟
 	for ($arc_block_level=0; $arc_block_level <= $#volume_position; $arc_block_level++){
 	    my $tmp_list_file = crate_tmp_list($arc_block_level, $volume_position[$arc_block_level], $volume_position[$arc_block_level+1], "$cfg_cache_dir/$cfg_backup_name/$cfg_backup_name.list");
             system( "$prog_tar -c -f - -T $tmp_list_file $prog_gzip_filter $prog_pgp_filter| $prog_ssh -l $cfg_remote_login $cfg_remote_host 'cat - > $cfg_remote_path/$backup_file_base-$arc_block_level.tar${arc_ext}'") == 0 || print "SSH connection failed (tar): $?\n";
@@ -458,7 +458,7 @@ if ( $cfg_type eq "local"){
     if ($cfg_backup_style eq "sync"){
 	print "WARNING: Backup style 'sync' only allowed for local and remote_ssh storage.\n" if ($cfg_verbose >= &VERB_ALL);
     } else {
-	if ($cfg_clean_flag == 1){ # Удалить старые копии
+	if ($cfg_clean_flag == 1){ # пёп╢п╟п╩п╦я┌я▄ я│я┌п╟я─я▀п╣ п╨п╬п©п╦п╦
 	    if ($cfg_save_old_backup == 0){
 		foreach $cur_dir ($ftp->ls()){
     		    $ftp->delete($cur_dir);
@@ -492,12 +492,12 @@ if ( $cfg_type eq "local"){
         $ftp->put("$cfg_cache_dir/$cfg_backup_name/.hash", "$backup_file_base.hash")|| print "Can't PUT old .hash file to remote FTP server\n";
 	$ftp->delete(".hash");
 	$ftp->put("$cfg_cache_dir/$cfg_backup_name/.hash", ".hash")|| print "Can't PUT new .hash file to remote FTP server\n";
-	# Обрабатываем разбиение на тома
+	# п·п╠я─п╟п╠п╟я┌я▀п╡п╟п╣п╪ я─п╟п╥п╠п╦п╣п╫п╦п╣ п╫п╟ я┌п╬п╪п╟
 	for ($arc_block_level=0; $arc_block_level <= $#volume_position; $arc_block_level++){
 	
-# 	    # Проблема была в модуле Net::FTP
+# 	    # п÷я─п╬п╠п╩п╣п╪п╟ п╠я▀п╩п╟ п╡ п╪п╬п╢я┐п╩п╣ Net::FTP
 #	    if ($arc_block_level > 0){
-#		# Переотктываем ftp сессию, для обхода проблемы '2Gb'
+#		# п÷п╣я─п╣п╬я┌п╨я┌я▀п╡п╟п╣п╪ ftp я│п╣я│я│п╦я▌, п╢п╩я▐ п╬п╠я┘п╬п╢п╟ п©я─п╬п╠п╩п╣п╪я▀ '2Gb'
 #		$ftp->quit;
 #		sleep(5);
 #		ftp_connect();
@@ -535,7 +535,7 @@ sub add_to_backup{
   my $file_fullpath_esc = $file_fullpath;
   $file_fullpath_esc =~ s/\'/\'\\\'\'/g;
 
-  # Создаем список директорий
+  # п║п╬п╥п╢п╟п╣п╪ я│п©п╦я│п╬п╨ п╢п╦я─п╣п╨я┌п╬я─п╦п╧
   if ((-d "$cfg_root_path/$file_fullpath") && (! -l "$cfg_root_path/$file_fullpath")){
       if (check_path($file_dir, $file_name) == 1){
 	if ($cfg_backup_style ne "hash"){
@@ -566,7 +566,7 @@ sub add_to_backup{
               return;
 	  }
       }
-  # Работаем с файлами
+  # п═п╟п╠п╬я┌п╟п╣п╪ я│ я└п╟п╧п╩п╟п╪п╦
   } elsif ((-f "$cfg_root_path/$file_fullpath") || (-l "$cfg_root_path/$file_fullpath")){
       if (check_path($file_dir, $file_name) == 1){
 	  ($tmp, $tmp, $stat_mode, $tmp, $stat_uid, $stat_gid, $tmp, $stat_size, $tmp, $stat_mtime) = stat("$cfg_root_path/$file_fullpath");
@@ -595,7 +595,7 @@ sub add_to_backup{
 }
 
 ###############################################
-# Проверяем изменился ли файл или нет, если да апдейтим лог.
+# п÷я─п╬п╡п╣я─я▐п╣п╪ п╦п╥п╪п╣п╫п╦п╩я│я▐ п╩п╦ я└п╟п╧п╩ п╦п╩п╦ п╫п╣я┌, п╣я│п╩п╦ п╢п╟ п╟п©п╢п╣п╧я┌п╦п╪ п╩п╬пЁ.
 sub check_update{
      my ($file, $checksum, $filesum, $stat_size) = @_;
     
@@ -604,7 +604,7 @@ sub check_update{
 		$file =~ s/^\/(.*)$/$1/;
 	        print LIST "$file\n";
 		
-	        # Обрабатываем случай разбиения гиганских архивов.
+	        # п·п╠я─п╟п╠п╟я┌я▀п╡п╟п╣п╪ я│п╩я┐я┤п╟п╧ я─п╟п╥п╠п╦п╣п╫п╦я▐ пЁп╦пЁп╟п╫я│п╨п╦я┘ п╟я─я┘п╦п╡п╬п╡.
 		if (-l "/$file"){
 		    $stat_size = 0;
 		}
@@ -629,8 +629,8 @@ sub check_update{
 }
 
 ###############################################
-# 0 - не добавлять файл
-# 1 - добавть файл
+# 0 - п╫п╣ п╢п╬п╠п╟п╡п╩я▐я┌я▄ я└п╟п╧п╩
+# 1 - п╢п╬п╠п╟п╡я┌я▄ я└п╟п╧п╩
 
 sub check_path {
     my ($dir_name, $file_name) = @_;
@@ -685,7 +685,7 @@ sub check_path {
     return 1;
 }
 ###############################################
-# Устанавливаем соединение с удаленным сервером по FTP.
+# пёя│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ я│п╬п╣п╢п╦п╫п╣п╫п╦п╣ я│ я┐п╢п╟п╩п╣п╫п╫я▀п╪ я│п╣я─п╡п╣я─п╬п╪ п©п╬ FTP.
 
 sub ftp_connect{
     if ( $cfg_type eq "remote_ftp"){
@@ -696,7 +696,7 @@ sub ftp_connect{
     }
 }
 ###############################################
-# Содание списка файлов для помещения в определенный том многотомного архива.
+# п║п╬п╢п╟п╫п╦п╣ я│п©п╦я│п╨п╟ я└п╟п╧п╩п╬п╡ п╢п╩я▐ п©п╬п╪п╣я┴п╣п╫п╦я▐ п╡ п╬п©я─п╣п╢п╣п╩п╣п╫п╫я▀п╧ я┌п╬п╪ п╪п╫п╬пЁп╬я┌п╬п╪п╫п╬пЁп╬ п╟я─я┘п╦п╡п╟.
 
 sub crate_tmp_list{
 	my ($arc_block_level, $position1, $position2, $full_list_path) = @_;
@@ -769,7 +769,11 @@ Only rebuild hash, no storing files in backup archive.
 Clean incremental backup storage and create new full backup without checking
 $cfg_increment_level config parameter.
 
+=back
+
 =head1 ADDITION SCRIPTS
+
+=over
 
 =item C<create_backup.sh>
 
@@ -808,8 +812,15 @@ Script for restore files backuped by C<fsbackup.pl>.
 
 Script for reinstall packages stored by C<sysbackup.sh>.
 
+=item C<scripts/mount-windows-share.sh>
+
+Script for mount Windows shared directory by C<sysbackup.sh>.
+
+=back
 
 =head1 CONFIGURATION FILE
+
+=over
 
 =item B<$cfg_backup_name> = 'test_host'
 
@@ -918,7 +929,7 @@ Verbose level.
 =item B<$cfg_save_old_backup> = 1
 
 Save previous backup to OLD directory before rotation or before storing full backup.
-    
+
     0 - don't save old backup
     1 - save old backup.
 
@@ -959,6 +970,7 @@ Operation priority:
     7. !path
     8. path
 
+=back
 
 =head1 COPYRIGHT
 

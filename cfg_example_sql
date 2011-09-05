@@ -10,7 +10,7 @@
 # Имя для бэкапа, строка состоящая из латинских букв, цифр и символа подчеркивания.
 #-------------------
 
-$cfg_backup_name = "test_host";
+$cfg_backup_name = "hostname_pgsql";
 
 
 #-------------------
@@ -32,12 +32,14 @@ $cfg_cache_dir = "/usr/local/fsbackup/cache";
 # данные, использование gzip приведет к двойному сжатию и лишней нагрузке на CPU.
 #-------------------
 
-$prog_md5sum	= "md5sum -b";
-$prog_tar	= "tar";
-$prog_ssh	= "ssh";
-$prog_rm	= "rm";
-$prog_gzip	= "gzip"; # Если равно "", то не использовать сжатие.
-$prog_pgp	= "gpg";  # Если равно "", то не применять шифрование.
+$prog_md5sum	= "/usr/bin/md5sum -b";
+$prog_tar	= "/bin/tar";
+$prog_ssh	= "/usr/bin/ssh";
+$prog_rm	= "/bin/rm";
+$prog_gzip	= "/usr/bin/gzip"; # Если равно "", то не использовать сжатие.
+#$prog_gzip	= "";
+#$prog_pgp	= "/usr/bin/gpg";  # Если равно "", то не применять шифрование.
+$prog_pgp	= "";
 
 
 #-------------------
@@ -72,7 +74,7 @@ $cfg_checksum = "timesize";
 #		      (пометка помещения файлов в бэкап, без физического перемещения)
 #-------------------
 
-$cfg_backup_style = "backup";
+$cfg_backup_style = "full_backup";
 
 
 #-------------------
@@ -82,7 +84,7 @@ $cfg_backup_style = "backup";
 # на 7 раз бэкап будет объединен в один файл. 0 - сколько угодно раз.
 #-------------------
 
-$cfg_increment_level = 7;
+$cfg_increment_level = 4;
 
 
 #-------------------
@@ -111,7 +113,7 @@ $cfg_save_old_backup = 1;
 #	remote_ftp - копирование бэкапа на удаленную машину по FTP
 #-------------------
 
-$cfg_type = "local";
+$cfg_type = "remote_ftp";
 
 
 #-------------------
@@ -119,9 +121,9 @@ $cfg_type = "local";
 # Параметры необходимые для копирования бэкапа через ssh и ftp:
 #-------------------
 
-$cfg_remote_host = "backup-server.test.ru";
-$cfg_remote_login = "backup_login";
-$cfg_remote_path = "/home/backup_login/backup";
+$cfg_remote_host = "fsbackup.company.net";
+$cfg_remote_login = "fsbackup";
+$cfg_remote_path = "/hostname_pgsql";
 
 #-------------------
 # FTP transfer mode. If set to a non-zero value then all data transfers will
@@ -132,7 +134,7 @@ $cfg_remote_path = "/home/backup_login/backup";
 # 1 - Passive режим (для специфичных ftp серверов или особых настроек фаерволов).
 #-------------------
 
-$cfg_remote_ftp_mode = 0;
+$cfg_remote_ftp_mode = 1;
 
 #-------------------
 # Password of remote login for remote_ftp storage type.
@@ -238,7 +240,7 @@ $cfg_verbose = 2;
 #		 гибкость настройки).
 #-------------------
 
-$cfg_stopdir_prune=0;
+$cfg_stopdir_prune=1;
 
 1;
 #-------------------
@@ -309,84 +311,19 @@ $cfg_stopdir_prune=0;
 #-------------------
 
 __DATA__
-/usr/local/fsbackup
-!/usr/local/fsbackup/cache
-f!\.core$
-f!^core$
-f!\.o$
-f!\.log$
-#d~public_html
-#d!/log
-#f~netconf\.log.*
+# SQL data
+/usr/local/fsbackup/sys_backup
 
-# Linux
-/usr/src/linux/.config
+/etc/mysql
+/usr/local/etc/mysql
 
-# BSD
-/var/db/pkg
-/usr/src/sys/i386/conf
-
-# Users
-/home
-/root
-!/home/ftp
-=!\.netscape/cache/
-=!\.mozilla/.*/Cache/
-=!\.mozilla/.*/NewCache/
-=!\.mozilla/.*/News/
-f!.*\.avi$
-f!.*\.mpeg$
-f!.*\.mpg$
-f!.*\.mp3$
-f!\.~$
-f!\.swp$
-
-# System configuration
-/etc
-/var/cron/tabs
-/var/spool/cron
-/var/spool/atjobs
-/var/spool/atspool
-/usr/local/etc
-
-# Installed packages
-/usr/local/bin
-/usr/local/include
-/usr/local/lib
-/usr/local/libdata
-/usr/local/libexec
-/usr/local/sbin
-/usr/local/share
-/var/ucd-snmp
-
-# Programs from source
-/usr/local/apache/bin
-/usr/local/apache/conf
-/usr/local/apache/cgi-bin
-/usr/local/apache/htdocs
-/usr/local/apache/libexec
-/usr/local/apache/src
-/usr/local/www
-/usr/local/mysql/bin
-/usr/local/mysql/include
-/usr/local/mysql/lib
-/usr/local/mysql/libexec
-/usr/local/mysql/var/mysql
-/usr/local/pgsql/bin
-/usr/local/pgsql/share
-/usr/local/pgsql/lib
-/usr/local/pgsql/include
+/var/lib/pgsql/data/PG_VERSION
+/var/lib/pgsql/data/pg_hba.conf
+/var/lib/pgsql/data/pg_ident.conf
+/var/lib/pgsql/data/postgresql.conf
+/var/lib/pgsql/data/postmaster.opts
 /usr/local/pgsql/data
 !/usr/local/pgsql/data/base
 !/usr/local/pgsql/data/pg_xlog
 !/usr/local/pgsql/data/pg_clog
-/usr/local/squid/bin
-/usr/local/squid/etc
-/usr/local/news/etc
-/usr/local/news/bin
-/usr/local/news/lib
-/usr/local/samba/bin
-/usr/local/samba/lib
-/usr/local/src
-/usr/local/uucp
 

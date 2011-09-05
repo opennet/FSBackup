@@ -1,5 +1,5 @@
 #!/bin/sh
-# úÅÒËÁÌÉÒÏ×ÁÎÉÅ /home × /backup2
+# Ð—ÐµÑ€ÐºÐ°Ð»Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ /home Ð² /backup2
 # 8 18 * * * /usr/local/etc/backup/double_mirror.sh >/var/log/rsync.log 
 
 date
