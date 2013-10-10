@@ -30,7 +30,7 @@ backup_path="/usr/local/fsbackup"
 
 #--------------------------------------
 
-config_files="cfg_example cfg_example_local cfg_example_users cfg_example_root"
+config_files="cfg_example cfg_example_users cfg_example_sql"
 
 
 #--------------------------------------
