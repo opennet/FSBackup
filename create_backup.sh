@@ -84,7 +84,7 @@ if [ "$IDLE" != "" ];  then
 fi
 
 
-#cd $backup_path
+cd $backup_path
 
 # Оставил ulimit после тестирования, на всякий случай.
 #ulimit -f 512000;ulimit -d 20000;ulimit -c 100;ulimit -m 25000;ulimit -l 15000
