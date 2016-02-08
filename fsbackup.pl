@@ -691,7 +691,7 @@ sub ftp_connect{
     if ( $cfg_type eq "remote_ftp"){
 	$ftp = Net::FTP->new($cfg_remote_host, Timeout => 30, Debug => 0,  Passive => $cfg_remote_ftp_mode) || die "Can't connect to ftp server.\n";
 	$ftp->login($cfg_remote_login, $cfg_remote_password) || die "Can't login to ftp server.\n";
-        $ftp->cwd($cfg_remote_path) || die "Path $cfg_remote_path not found on ftp server.\n";
+	$ftp->cwd($cfg_remote_path) || $ftp->mkdir("$cfg_remote_path") || die "Path $cfg_remote_path not found on ftp server.\n";
 	$ftp->binary();    
     }
 }
