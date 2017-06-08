@@ -103,8 +103,8 @@ fi
 # Полный бэкап для Mysql
 if [ "_$backup_method" = "_full" ]; then
     echo "Creating full backup of all MySQL databases."
-    ${backup_progdump_path}mysqldump --all --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
-    ${backup_progdump_path}mysqldump --all-databases --all --add-drop-table --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost |gzip > $backup_path/$backup_name-mysql.gz
+    ${backup_progdump_path}mysqldump --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
+    ${backup_progdump_path}mysqldump --all-databases --add-drop-table --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost |gzip > $backup_path/$backup_name-mysql.gz
     exit
 fi
 
@@ -112,13 +112,13 @@ fi
 # Бэкап указанных баз для Mysql
 if [ "_$backup_method" = "_db" ]; then
     echo "Creating full backup of $backup_db_list MySQL databases."
-    ${backup_progdump_path}mysqldump --all --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
+    ${backup_progdump_path}mysqldump --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
     cat /dev/null > $backup_path/$backup_name-mysql
 
     for cur_db in $backup_db_list; do
 	echo "Dumping $cur_db..."
 	cur_db=`echo "$cur_db" | awk -F':' '{if (\$2 != ""){print \$1, \$2}else{print \$1}}'`
-	${backup_progdump_path}mysqldump --all --add-drop-table --databases --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db	>> $backup_path/$backup_name-mysql
+	${backup_progdump_path}mysqldump --add-drop-table --databases --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db	>> $backup_path/$backup_name-mysql
     done
     gzip -f $backup_path/$backup_name-mysql
     exit
@@ -128,7 +128,7 @@ fi
 # Бэкап всех баз кроме указанных для Mysql
 if [ "_$backup_method" = "_notdb" ]; then
     echo "Creating full backup of all MySQL databases except databases $backup_db_list."
-    ${backup_progdump_path}mysqldump --all --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
+    ${backup_progdump_path}mysqldump --add-drop-table --all-databases --force --no-data $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost > $backup_path/$backup_name-struct-mysql
     cat /dev/null > $backup_path/$backup_name-mysql
     
     for cur_db in `${backup_progdump_path}mysqlshow --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost | tr -d ' |'|grep -v -E '^Databases$|^\+\-\-\-'`; do
@@ -136,7 +136,7 @@ if [ "_$backup_method" = "_notdb" ]; then
 	grep_flag=`echo " $backup_db_list"| grep " $cur_db:"`
 	if [ -n "$grep_flag" ]; then
 # Исключение таблиц для данной базы
-	    ${backup_progdump_path}mysqldump --all --add-drop-table --databases --no-create-info --no-data --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db >> $backup_path/$backup_name-mysql
+	    ${backup_progdump_path}mysqldump --add-drop-table --databases --no-create-info --no-data --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db >> $backup_path/$backup_name-mysql
 
 	    for cur_db_table in `${backup_progdump_path}mysqlshow --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db| tr -d ' |'|grep -v -E '^Tables$|^Database\:|^\+\-\-\-'`; do
 
@@ -149,7 +149,7 @@ if [ "_$backup_method" = "_notdb" ]; then
 
 		if [ $flag -gt 0 ]; then
 		    echo "Dumping $cur_db:$cur_db_table..."
-		    ${backup_progdump_path}mysqldump --all --add-drop-table --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db $cur_db_table >> $backup_path/$backup_name-mysql
+		    ${backup_progdump_path}mysqldump --add-drop-table --force $extra_mysqldump_flag --password=$backup_mysqlpassword --user=$backup_mysqluser --host=$backup_mysqlhost $cur_db $cur_db_table >> $backup_path/$backup_name-mysql
 
 		else
 		    echo "Skiping $cur_db:$cur_db_table..."
