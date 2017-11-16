@@ -87,7 +87,7 @@ chown_by_suuser=0
 # Сделать последний WAL (Write-Ahead Logs) бакап и сделать rotate в конце.
 # Перед этим положив эти скрипты из папки 'contrib/psql_wal' дистрибутива в /usr/local/fsbackup/scripts
 # Обязательно настроить эти скрипты (подредактировав их вначале)
-# Инструкции, что такое WAL и как использовать находятся в комментариях файла daily_pgsql_backup.sh
+# Инструкции, что такое WAL и как использовать находятся в комментариях файла contrib/psql_wal/daily_pgsql_backup.sh
 wal_backup=0
 
 #-------------------
@@ -117,7 +117,8 @@ backup_progdump_path="/usr/local/pgsql/bin"
 #      столбцов. Если скорость восстановления из бэкапа и размер бэкапа
 #      более важны, и совместимостью с другими СУБД можно пренебречь,
 #      используйте: extra_pg_dump_flag=""
-# -s - Dump only the object definitions (schema), not data.
+#      Новое имя '-D' опции: --inserts
+#
 #  -h, --host=ИМЯ           имя сервера баз данных или каталог сокетов
 #  -l, --database=ИМЯ_БД    выбор другой базы данных по умолчанию
 #  -p, --port=ПОРТ          номер порта сервера БД
@@ -126,13 +127,13 @@ backup_progdump_path="/usr/local/pgsql/bin"
 #  -W, --password           запрашивать пароль всегда (обычно не требуется)
 #-------------------
 
-extra_pg_dump_flag="-D"
+extra_pg_dump_flag="--inserts"
 #extra_pg_dump_flag=""
 
 ############################################################################
 
 if [ "_$backup_sqluser" != "_" ]; then
-        # заполняем $PGPASS_FILE для авторизации
+	# заполняем $PGPASS_FILE для авторизации
 	echo "$backup_sqlhost:$backup_sqlport:*:$backup_sqluser:$backup_sqlpassword" > $PGPASS_FILE
 	chmod 0600 $PGPASS_FILE
 
@@ -146,9 +147,9 @@ if [ "_$backup_sqluser" != "_" ]; then
 	fi
 fi
 
-if [ "_$backup_suuser" != "_" && $chown_by_suuser -eq 1 ]; then
-	chown -R $backup_suuser $backup_path
-        chown $backup_suuser $PGPASS_FILE
+if [ "_$backup_suuser" != "_" ] && [ $chown_by_suuser -eq 1 ]; then
+    chown -R $backup_suuser $backup_path
+    chown $backup_suuser $PGPASS_FILE
 fi
 
 if [ -n "$backup_progdump_path" ]; then
@@ -166,8 +167,10 @@ fi
 # Полный бэкап для Postgresql
 if [ "_$backup_method" = "_full" ]; then
     echo "Creating full backup of all PostgreSQL databases."
-    if [ "_$backup_sqluser" != "_" ]; then
-        #${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
+    if [ "_$backup_sqluser" = "_" ]; then
+        ${backup_progdump_path}pg_dumpall $extra_pg_dump_flag -s > $backup_path/$backup_name-struct-pgsql
+    fi
+    if [ "_$backup_suuser" != "_" ]; then
         su - ${backup_suuser} -c ${backup_progdump_path}/pg_dumpall $extra_pg_dump_flag > $backup_path/$backup_name-pgsql
     else
         ${backup_progdump_path}/pg_dumpall $extra_pg_dump_flag > $backup_path/$backup_name-pgsql
@@ -177,13 +180,15 @@ if [ "_$backup_method" = "_full" ]; then
 # Бэкап указанных баз для Postgresql
 elif [ "_$backup_method" = "_db" ]; then
     echo "Creating full backup of $backup_db_list PostgreSQL databases."
-#    ${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
+    if [ "_$backup_sqluser" = "_" ]; then
+        ${backup_progdump_path}pg_dumpall $extra_pg_dump_flag -s > $backup_path/$backup_name-struct-pgsql
+    fi
     cat /dev/null > $backup_path/$backup_name-pgsql
 
     for cur_db in $backup_db_list; do
 	echo "Dumping $cur_db..."
 	cur_db=`echo "$cur_db" | awk -F':' '{if (\$2 != ""){print "-t", \$2, \$1}else{print \$1}}'`
-	if [ "_$backup_sqluser" != "_" ]; then
+	if [ "_$backup_suuser" != "_" ]; then
 		chown $backup_suuser $backup_path/$backup_name-pgsql
 		su - ${backup_suuser} -c ${backup_progdump_path}pg_dump $extra_pg_dump_flag $cur_db >> $backup_path/$backup_name-pgsql
         else
@@ -196,12 +201,14 @@ elif [ "_$backup_method" = "_db" ]; then
 # Бэкап всех баз кроме указанных для Postgresql
 elif [ "_$backup_method" = "_notdb" ]; then
     echo "Creating full backup of all PostgreSQL databases except databases $backup_db_list."
-    if [ "_$backup_sqluser" != "_" ]; then
-        # TODO: нужно доделать это место ниже... а пока заглушка :)
-        echo "The '$backup_method' method does not support the 'backup_sqluser' parameter, yet. Sorry, exit..."
+    if [ "_$backup_suuser" != "_" ]; then
+        # TODO: нужно доделать это место ниже... а пока заглушка:
+        echo "The '$backup_method' method does not support the 'backup_suuser' parameter, yet. Sorry, exit..."
         exit 1
     fi
-#    ${backup_progdump_path}pg_dumpall -s > $backup_path/$backup_name-struct-pgsql
+    if [ "_$backup_sqluser" = "_" ]; then
+        ${backup_progdump_path}pg_dumpall $extra_pg_dump_flag -s > $backup_path/$backup_name-struct-pgsql
+    fi
     cat /dev/null > $backup_path/$backup_name-pgsql
 
     for cur_db in `${backup_progdump_path}psql -A -q -t -c "select datname from pg_database" template1 | grep -v '^template[01]$' `; do
