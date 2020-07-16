@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# ver 0.2
+# ver 0.3
 # by Molchanov Alexander <xorader@mail.ru>
 #
 # This script mounts Windows share.
@@ -9,8 +9,9 @@
 #  $cfg_type = "local";
 #  $cfg_local_path = "/usr/local/fsbackup/archive";
 #
-# Нужна установленная Samba с поддержкой CIFS и netcat.
-# For gentoo, example require: USE="ads client smbclient" emerge -v net-fs/samba net-analyzer/netcat
+# Нужна установленная Samba с поддержкой CIFS и netcat. Require:
+#   * for gentoo: USE="ads client smbclient" emerge -v net-fs/samba net-analyzer/netcat
+#   * for Debian-10: apt install cifs-utils smbclient netcat-traditional
 #
 
 # параметры windows хоста
@@ -23,7 +24,7 @@ SMB_CHECK_PORT=135
 LOCAL_MNT_DIR=/usr/local/fsbackup/archive
 
 # ------------------------------------------------
-if [ "_$1" == "_umount" ]; then
+if [ _"$1" = _"umount" ]; then
         echo "Ok. Backup done. Unmount share and exit..."
         if ! umount $LOCAL_MNT_DIR ; then
                 echo "Fail umount share '$LOCAL_MNT_DIR'."
@@ -36,7 +37,7 @@ fi
 
 # ------------------------------------------------
 
-echo "Check and wait availability Windows shared directory"
+echo "Check and wait availability Windows shared directory at '$SMB_HOST:$SMB_CHECK_PORT'"
 nc -z $SMB_HOST $SMB_CHECK_PORT
 res=$?
 
@@ -53,7 +54,6 @@ do
         sleep 300
 done
 
-
 # check if share already mounted
 if [ -n "`/bin/df -h | egrep \"//$SMB_HOST/$SMB_SHARE\"`" ]
 then
@@ -61,9 +61,9 @@ then
 	exit 2
 fi
 
-# sleep for waiting up all services on windows PC
+echo "Sleep 20sec for waiting up all services on windows PC"
 sleep 20
-
+echo "Ok, try to mount..."
 
 if mount.cifs //$SMB_HOST/$SMB_SHARE $LOCAL_MNT_DIR -o user=$SMB_USER,pass=$SMB_PASS
 then
